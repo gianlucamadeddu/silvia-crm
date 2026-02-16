@@ -812,17 +812,12 @@ async function moveLeadToStato(leadId, newStato) {
 // LEAD DETAIL PANEL
 // ═══════════════════════════════════════
 function openNewLead() {
-  currentLeadId = null;
-  document.getElementById('detailTitle').textContent = 'Nuovo Lead';
-  document.getElementById('detailActions').style.display = 'none';
-  document.getElementById('storicoSection').style.display = 'none';
-  clearForm();
-  openPanel();
+  window.location.href = 'lead-detail.html?id=new';
 }
 
 async function openLeadDetail(id) {
-  currentLeadId = id;
-  const lead = allLeads.find(l => l.id === id);
+  window.location.href = 'lead-detail.html?id=' + id;
+}
   if (!lead) return;
 
   document.getElementById('detailTitle').textContent = `${lead.nome} ${lead.cognome}`;
