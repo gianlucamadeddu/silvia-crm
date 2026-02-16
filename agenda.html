@@ -296,28 +296,32 @@ body {
 
 .day-event {
   font-size: 11px;
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s;
+  font-weight: 600;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
-.day-event:hover { opacity: 0.85; }
+.day-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
 
 .day-event.tipo-nuovo {
-  background: var(--primary-light);
-  color: var(--primary);
+  background: #3b82f6;
+  color: white;
   border-left: 3px solid var(--primary);
 }
 
 .day-event.tipo-richiamo {
-  background: var(--orange-light);
-  color: #92400e;
-  border-left: 3px solid var(--orange);
+  background: var(--orange);
+  color: white;
+  border-left: 3px solid #d97706;
 }
 
 .day-more {
@@ -422,32 +426,38 @@ body {
   position: absolute;
   left: 2px;
   right: 2px;
-  border-radius: 4px;
-  padding: 4px 6px;
-  font-size: 11px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   z-index: 1;
   overflow: hidden;
-  transition: opacity 0.15s;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.week-event:hover { opacity: 0.85; }
+.week-event:hover {
+  transform: scale(1.02);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  z-index: 5;
+}
 
 .week-event.tipo-nuovo {
-  background: var(--primary-light);
-  color: var(--primary);
-  border-left: 3px solid var(--primary);
+  background: #3b82f6;
+  color: white;
+  border-left: 4px solid var(--primary);
 }
 
 .week-event.tipo-richiamo {
-  background: var(--orange-light);
-  color: #92400e;
-  border-left: 3px solid var(--orange);
+  background: var(--orange);
+  color: white;
+  border-left: 4px solid #d97706;
 }
 
-.week-event-time { font-size: 10px; opacity: 0.8; }
-.week-event-title { font-weight: 600; }
+.week-event-time { font-size: 11px; opacity: 0.9; font-weight: 400; }
+.week-event-title { font-weight: 700; font-size: 12px; line-height: 1.3; margin-top: 1px; }
+.week-event-desc { font-size: 10px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ═══════════════════════════════════════════
    CALENDAR — DAY VIEW
@@ -499,37 +509,39 @@ body {
   top: -8px;
 }
 
-.day-event {
+.dv-event {
   position: absolute;
   left: 4px;
   right: 4px;
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
   cursor: pointer;
   z-index: 1;
   transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
-.day-event:hover {
+.dv-event:hover {
   transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 5;
 }
 
-.day-event.tipo-nuovo {
-  background: var(--primary-light);
-  color: var(--primary);
-  border-left: 4px solid var(--primary);
+.dv-event.tipo-nuovo {
+  background: #3b82f6;
+  color: white;
+  border-left: 5px solid var(--primary);
 }
 
-.day-event.tipo-richiamo {
-  background: var(--orange-light);
-  color: #92400e;
-  border-left: 4px solid var(--orange);
+.dv-event.tipo-richiamo {
+  background: var(--orange);
+  color: white;
+  border-left: 5px solid #d97706;
 }
 
-.day-event-time { font-size: 11px; font-weight: 500; opacity: 0.7; }
-.day-event-name { font-size: 13px; font-weight: 600; margin: 2px 0; }
-.day-event-desc { font-size: 11px; opacity: 0.7; }
+.dv-event-time { font-size: 12px; font-weight: 500; opacity: 0.9; }
+.dv-event-name { font-size: 15px; font-weight: 700; margin: 2px 0; }
+.dv-event-desc { font-size: 12px; opacity: 0.85; }
 
 /* ═══════════════════════════════════════════
    MODALS
@@ -1356,11 +1368,13 @@ function renderWeekEvent(appt) {
   const [h, m] = appt.ora.split(':').map(Number);
   const top = ((h - 7) * 60 + m);
   if (top < 0) return '';
-  const height = 40;
-  const nome = appt.leadNome || appt.leadCognome ? `${appt.leadNome} ${appt.leadCognome}`.trim() : '';
-  return `<div class="week-event tipo-${appt.tipo}" style="top:${top}px;height:${height}px" onclick="event.stopPropagation(); openDetail('${appt.id}')">
+  const height = 60;
+  const nome = appt.leadNome || appt.leadCognome ? `${appt.leadNome} ${appt.leadCognome}`.trim() : 'Senza lead';
+  const desc = appt.descrizione ? `<div class="week-event-desc">${appt.descrizione.substring(0, 30)}</div>` : '';
+  return `<div class="week-event tipo-${appt.tipo}" style="top:${top}px;min-height:${height}px" onclick="event.stopPropagation(); openDetail('${appt.id}')">
     <div class="week-event-time">${appt.ora.substring(0,5)}</div>
     <div class="week-event-title">${nome}</div>
+    ${desc}
   </div>`;
 }
 
@@ -1409,12 +1423,13 @@ function renderDayEvent(appt) {
   const [h, m] = appt.ora.split(':').map(Number);
   const top = ((h - 7) * 60 + m);
   if (top < 0) return '';
-  const height = 50;
+  const height = 60;
   const nome = appt.leadNome || appt.leadCognome ? `${appt.leadNome} ${appt.leadCognome}`.trim() : 'Senza lead';
-  return `<div class="day-event tipo-${appt.tipo}" style="top:${top}px;height:${height}px" onclick="event.stopPropagation(); openDetail('${appt.id}')">
-    <div class="day-event-time">${appt.ora.substring(0,5)}</div>
-    <div class="day-event-name">${nome}</div>
-    <div class="day-event-desc">${appt.descrizione ? appt.descrizione.substring(0, 50) : ''}</div>
+  const tipoLabel = appt.tipo === 'richiamo' ? '🔔 Richiamo' : '📅 Appuntamento';
+  return `<div class="dv-event tipo-${appt.tipo}" style="top:${top}px;min-height:${height}px" onclick="event.stopPropagation(); openDetail('${appt.id}')">
+    <div class="dv-event-time">${appt.ora.substring(0,5)} · ${tipoLabel}</div>
+    <div class="dv-event-name">${nome}</div>
+    <div class="dv-event-desc">${appt.descrizione ? appt.descrizione.substring(0, 80) : ''}</div>
   </div>`;
 }
 
