@@ -452,11 +452,7 @@
         // Click per aprire il lead dalla dashboard
         container.querySelectorAll('.section-row').forEach(row => {
           row.addEventListener('click', () => {
-            // Vai alla pagina lead e apri il dettaglio
-            navItems.forEach(n => n.classList.remove('active'));
-            document.querySelector('[data-page="lead"]').classList.add('active');
-            showPage('lead');
-            setTimeout(() => openLeadDetail(row.dataset.id), 500);
+            openLeadDetail(row.dataset.id);
           });
         });
       } catch (err) {
@@ -918,104 +914,18 @@
       currentLeadId = null;
     }
 
+    // ══════════════════════════════════════════════
+    // MODIFICA 1: openNewLead → redirect a lead-detail.html
+    // ══════════════════════════════════════════════
     function openNewLead() {
-  window.location.href = 'lead-detail.html?id=new';
-}
+      window.location.href = 'lead-detail.html?id=new';
+    }
 
+    // ══════════════════════════════════════════════
+    // MODIFICA 2: openLeadDetail → redirect a lead-detail.html
+    // ══════════════════════════════════════════════
     async function openLeadDetail(id) {
-  window.location.href = 'lead-detail.html?id=' + id;
-}
-      if (!lead) return;
-
-      document.getElementById('leadPanelTitle').textContent = `${lead.nome} ${lead.cognome}`;
-      const fontiOpts = allFonti.map(f => `<option value="${f.nome}" ${lead.fonte === f.nome ? 'selected' : ''}>${f.nome}</option>`).join('');
-      const statiOpts = allStati.map(s => `<option value="${s.nome}" ${lead.stato === s.nome ? 'selected' : ''}>${s.nome}</option>`).join('');
-      const prioOpts = ['', 'bassa', 'media', 'alta'].map(p => `<option value="${p}" ${(lead.priorita || '') === p ? 'selected' : ''}>${p || 'Nessuna'}</option>`).join('');
-
-      document.getElementById('leadPanelBody').innerHTML = `
-        <!-- AZIONI RAPIDE -->
-        <div class="lead-actions-bar">
-          <select class="btn btn-secondary" id="fStatoSelect" style="font-weight:600;padding:6px 12px;font-size:12px;">${statiOpts}</select>
-          <button class="btn btn-whatsapp" style="padding:6px 12px;font-size:12px;" id="btnWA"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 0 0 .613.613l4.458-1.495A11.952 11.952 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.352 0-4.55-.752-6.338-2.034l-.442-.332-3.263 1.093 1.093-3.263-.332-.442A9.955 9.955 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg> WhatsApp</button>
-          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" id="btnEmail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button>
-          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" id="btnCall"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Chiama</button>
-          <button class="btn btn-red" style="padding:6px 12px;font-size:12px;" id="btnDeleteLead"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Elimina</button>
-        </div>
-
-        <!-- FORM -->
-        <div class="lead-section">
-          <h3 class="lead-section-title">Anagrafica</h3>
-          <div class="lead-form-grid">
-            <div class="form-group"><label class="required">Nome</label><input type="text" id="fNome" value="${lead.nome || ''}"></div>
-            <div class="form-group"><label class="required">Cognome</label><input type="text" id="fCognome" value="${lead.cognome || ''}"></div>
-            <div class="form-group"><label class="required">Telefono</label><input type="tel" id="fTelefono" value="${lead.telefono || ''}"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="fEmail" value="${lead.email || ''}"></div>
-            <div class="form-group"><label>Fonte</label><select id="fFonte"><option value="">Seleziona...</option>${fontiOpts}</select></div>
-            <div class="form-group"><label>Priorità</label><select id="fPriorita">${prioOpts}</select></div>
-            <div class="form-group"><label>Provincia</label><input type="text" id="fProvincia" value="${lead.provincia || ''}"></div>
-            <div class="form-group"><label>È minore?</label><select id="fIsMinore"><option value="false" ${!lead.isMinore ? 'selected' : ''}>No</option><option value="true" ${lead.isMinore ? 'selected' : ''}>Sì</option></select></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Note</label><textarea id="fNote" rows="2">${lead.note || ''}</textarea></div>
-          </div>
-        </div>
-        <div class="lead-section" id="genitoreSection" style="display:${lead.isMinore ? 'block' : 'none'}">
-          <h3 class="lead-section-title">Dati Genitore / Tutore</h3>
-          <div class="lead-form-grid">
-            <div class="form-group"><label>Nome</label><input type="text" id="fGenNome" value="${lead.genitore?.nome || ''}"></div>
-            <div class="form-group"><label>Cognome</label><input type="text" id="fGenCognome" value="${lead.genitore?.cognome || ''}"></div>
-            <div class="form-group"><label>Telefono</label><input type="tel" id="fGenTelefono" value="${lead.genitore?.telefono || ''}"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="fGenEmail" value="${lead.genitore?.email || ''}"></div>
-          </div>
-        </div>
-
-        <!-- STORICO -->
-        <div class="lead-section">
-          <h3 class="lead-section-title">Storico Stati</h3>
-          <div id="storicoTimeline"><div style="display:flex;justify-content:center;padding:20px;"><div class="spinner"></div></div></div>
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-          <button class="btn btn-secondary" id="btnCancelLead">Annulla</button>
-          <button class="btn btn-green" id="btnSaveLead">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Salva
-          </button>
-        </div>
-      `;
-
-      // Bind events
-      document.getElementById('fIsMinore').addEventListener('change', function () {
-        document.getElementById('genitoreSection').style.display = this.value === 'true' ? 'block' : 'none';
-      });
-      document.getElementById('btnCancelLead').addEventListener('click', closeLeadPanel);
-      document.getElementById('btnSaveLead').addEventListener('click', saveLead);
-      document.getElementById('fStatoSelect').addEventListener('change', async function () {
-        await moveLeadToStato(id, this.value);
-        await loadStorico(id);
-      });
-      document.getElementById('btnWA').addEventListener('click', () => {
-        const tel = document.getElementById('fTelefono').value.replace(/\D/g, '');
-        if (tel) window.open(`https://wa.me/39${tel}`, '_blank');
-      });
-      document.getElementById('btnEmail').addEventListener('click', () => {
-        const email = document.getElementById('fEmail').value;
-        if (email) window.open(`mailto:${email}`);
-      });
-      document.getElementById('btnCall').addEventListener('click', () => {
-        const tel = document.getElementById('fTelefono').value;
-        if (tel) window.open(`tel:${tel}`);
-      });
-      document.getElementById('btnDeleteLead').addEventListener('click', () => {
-        document.getElementById('deleteMessage').textContent = 'Sei sicuro di voler eliminare questo lead? Questa azione è irreversibile.';
-        deleteCallback = async () => {
-          await deleteDoc(doc(db, 'leads', currentLeadId));
-          closeLeadPanel();
-          showToast('Lead eliminato', 'info');
-        };
-        openModal('deleteModal');
-      });
-
-      openLeadPanel();
-      loadStorico(id);
+      window.location.href = 'lead-detail.html?id=' + id;
     }
 
     async function loadStorico(leadId) {
