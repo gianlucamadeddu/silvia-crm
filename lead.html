@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silvia CRM — Lead</title>
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ========== SIDEBAR ========== */
+.sidebar { width: 240px; background: #fff; border-right: 1px solid #e2e8f0; padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+.sidebar-brand { font-size: 20px; font-weight: 700; color: #1e40af; margin-bottom: 2px; }
+.sidebar-tagline { font-size: 12px; color: #64748b; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; transition: all .15s; }
+.sidebar-item:hover { background: #f1f5f9; color: #1e293b; }
+.sidebar-item.active { background: #1e40af; color: #fff; }
+.sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* ========== MAIN CONTENT ========== */
+.main { margin-left: 240px; flex: 1; padding: 28px 32px; min-height: 100vh; }
+
+/* ========== PAGE HEADER ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-header h1 { font-size: 24px; font-weight: 700; color: #1e293b; }
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ========== BUTTONS ========== */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; transition: all .15s; white-space: nowrap; }
+.btn-primary { background: #1e40af; color: #fff; }
+.btn-primary:hover { background: #1e3a8a; }
+.btn-secondary { background: #fff; color: #1e293b; border: 1px solid #e2e8f0; }
+.btn-secondary:hover { background: #f8fafc; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-success { background: #22c55e; color: #fff; }
+.btn-success:hover { background: #16a34a; }
+.btn-whatsapp { background: #25d366; color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn svg { width: 16px; height: 16px; }
+
+/* ========== FILTER BAR ========== */
+.filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #fff; padding: 14px 18px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.filter-bar select, .filter-bar input[type="text"], .filter-bar input[type="date"] {
+  padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; color: #1e293b; background: #fff; outline: none; transition: border .15s;
+}
+.filter-bar select:focus, .filter-bar input:focus { border-color: #1e40af; }
+.filter-bar input[type="text"] { min-width: 200px; }
+.filter-separator { width: 1px; height: 28px; background: #e2e8f0; }
+.view-toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-left: auto; }
+.view-toggle button { padding: 7px 14px; border: none; background: #fff; color: #64748b; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 5px; transition: all .15s; }
+.view-toggle button.active { background: #1e40af; color: #fff; }
+.view-toggle button:not(:last-child) { border-right: 1px solid #e2e8f0; }
+.date-range { display: none; align-items: center; gap: 6px; }
+.date-range.visible { display: flex; }
+
+/* ========== BULK ACTIONS ========== */
+.bulk-bar { display: none; align-items: center; gap: 12px; padding: 10px 18px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; margin-bottom: 16px; }
+.bulk-bar.visible { display: flex; }
+.bulk-bar span { font-size: 13px; color: #991b1b; font-weight: 500; }
+
+/* ========== KANBAN VIEW ========== */
+.kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 16px; min-height: 500px; }
+.kanban-column { min-width: 270px; max-width: 300px; flex: 1; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+.kanban-header { padding: 12px 14px; border-radius: 12px 12px 0 0; display: flex; align-items: center; justify-content: space-between; }
+.kanban-header-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.kanban-header-count { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,.5); }
+.kanban-body { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 60px; overflow-y: auto; }
+.kanban-body.drag-over { background: rgba(30,64,175,.06); border-radius: 0 0 12px 12px; }
+.kanban-card { background: #fff; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0; cursor: grab; transition: box-shadow .15s, transform .1s; position: relative; }
+.kanban-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.kanban-card.dragging { opacity: .5; transform: rotate(2deg); }
+.kanban-card-check { position: absolute; top: 10px; right: 10px; width: 16px; height: 16px; accent-color: #1e40af; cursor: pointer; }
+.kanban-card-name { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 4px; padding-right: 24px; }
+.kanban-card-phone { font-size: 12px; color: #64748b; margin-bottom: 2px; }
+.kanban-card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.kanban-card-fonte { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; }
+.kanban-card-date { font-size: 11px; color: #94a3b8; }
+
+/* ========== LIST VIEW ========== */
+.list-view { display: none; }
+.list-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+.list-table thead th { background: #f8fafc; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #64748b; font-weight: 600; cursor: pointer; user-select: none; white-space: nowrap; }
+.list-table thead th:hover { color: #1e293b; }
+.list-table thead th .sort-icon { display: inline-block; margin-left: 4px; font-size: 10px; }
+.list-table tbody tr { border-top: 1px solid #f1f5f9; cursor: pointer; transition: background .1s; }
+.list-table tbody tr:hover { background: #f8fafc; }
+.list-table td { padding: 10px 14px; font-size: 13px; }
+.list-table td:first-child, .list-table th:first-child { width: 40px; text-align: center; }
+.list-table td:first-child input { accent-color: #1e40af; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+
+/* ========== MODALS ========== */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.4); z-index: 500; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 28px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.15); }
+.modal-lg { max-width: 800px; }
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: #1e293b; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* ========== FORMS ========== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 12px; color: #64748b; font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea {
+  padding: 9px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; color: #1e293b; outline: none; transition: border .15s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e40af; }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.required::after { content: " *"; color: #ef4444; }
+
+/* ========== DROPZONE ========== */
+.dropzone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all .2s; }
+.dropzone:hover, .dropzone.dragover { border-color: #1e40af; background: #eff6ff; }
+.dropzone svg { width: 40px; height: 40px; color: #94a3b8; margin-bottom: 10px; }
+.dropzone p { font-size: 14px; color: #64748b; }
+.dropzone .hint { font-size: 12px; color: #94a3b8; margin-top: 6px; }
+
+/* ========== IMPORT PREVIEW TABLE ========== */
+.preview-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; }
+.preview-table th { background: #f8fafc; padding: 8px; text-align: left; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .3px; }
+.preview-table td { padding: 8px; border-top: 1px solid #f1f5f9; }
+.preview-table tr.error { background: #fef2f2; }
+.preview-table tr.error td { color: #991b1b; }
+.error-msg { font-size: 12px; color: #ef4444; font-weight: 500; }
+
+/* ========== SCHEDA LEAD (PANNELLO DESTRO) ========== */
+.lead-detail-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.3); z-index: 400; }
+.lead-detail-overlay.open { display: block; }
+.lead-detail { position: fixed; top: 0; right: -520px; width: 500px; max-width: 90vw; height: 100vh; background: #fff; z-index: 401; transition: right .25s ease; overflow-y: auto; border-left: 1px solid #e2e8f0; box-shadow: -4px 0 20px rgba(0,0,0,.08); }
+.lead-detail.open { right: 0; }
+.lead-detail-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: #fff; z-index: 2; }
+.lead-detail-header h2 { font-size: 18px; font-weight: 700; }
+.lead-detail-close { background: none; border: none; color: #64748b; padding: 4px; border-radius: 6px; }
+.lead-detail-close:hover { background: #f1f5f9; color: #1e293b; }
+.lead-detail-body { padding: 24px; }
+.lead-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.lead-section { margin-bottom: 24px; }
+.lead-section h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #64748b; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+
+/* ========== TIMELINE ========== */
+.timeline { display: flex; flex-direction: column; gap: 10px; }
+.timeline-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-left: 3px solid; border-radius: 0 8px 8px 0; background: #f8fafc; }
+.timeline-item .ti-content { flex: 1; }
+.timeline-item .ti-label { font-size: 12px; color: #64748b; }
+.timeline-item .ti-value { font-size: 13px; font-weight: 600; }
+.timeline-item .ti-date { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+
+/* ========== TOAST ========== */
+.toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all .25s; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #22c55e; }
+.toast.error { background: #ef4444; }
+.toast.info { background: #1e40af; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; padding: 16px 8px; }
+  .sidebar-brand, .sidebar-tagline, .sidebar-item span { display: none; }
+  .sidebar-item { justify-content: center; padding: 10px; }
+  .main { margin-left: 60px; padding: 16px; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-separator { display: none; }
+  .view-toggle { margin-left: 0; }
+  .form-grid { grid-template-columns: 1fr; }
+  .kanban { flex-direction: column; }
+  .kanban-column { min-width: 100%; max-width: 100%; }
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<nav class="sidebar">
+  <div class="sidebar-brand">SILVIA</div>
+  <div class="sidebar-tagline">Vendita</div>
+  <div class="sidebar-nav">
+    <a href="index.html" class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="lead.html" class="sidebar-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Lead</span>
+    </a>
+    <a href="agenda.html" class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Agenda</span>
+    </a>
+    <a href="template.html" class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Template</span>
+    </a>
+    <a href="impostazioni.html" class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Impostazioni</span>
+    </a>
+    <a href="report.html" class="sidebar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Report</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ========== MAIN ========== -->
+<div class="main">
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>Lead</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="downloadTemplate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Scarica Template
+      </button>
+      <button class="btn btn-secondary" onclick="openModal('importModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importa da Excel
+      </button>
+      <button class="btn btn-primary" onclick="openNewLead()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuovo Lead
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <select id="filterPeriodo" onchange="handlePeriodChange()">
+      <option value="mese">Mese corrente</option>
+      <option value="trimestre">Trimestre</option>
+      <option value="semestre">Semestre</option>
+      <option value="anno">Anno</option>
+      <option value="tutti">Tutti</option>
+      <option value="personalizzato">Personalizzato</option>
+    </select>
+    <div class="date-range" id="dateRange">
+      <input type="date" id="filterDa" onchange="applyFilters()">
+      <span style="color:#94a3b8;font-size:12px">—</span>
+      <input type="date" id="filterA" onchange="applyFilters()">
+    </div>
+    <div class="filter-separator"></div>
+    <select id="filterFonte" onchange="applyFilters()">
+      <option value="">Tutte le fonti</option>
+    </select>
+    <select id="filterStato" onchange="applyFilters()">
+      <option value="">Tutti gli stati</option>
+    </select>
+    <div class="filter-separator"></div>
+    <input type="text" id="searchInput" placeholder="Cerca nome, cognome, telefono, email..." oninput="applyFilters()">
+    <div class="view-toggle">
+      <button id="btnKanban" class="active" onclick="setView('kanban')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+        Kanban
+      </button>
+      <button id="btnElenco" onclick="setView('elenco')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Elenco
+      </button>
+    </div>
+  </div>
+
+  <!-- BULK ACTIONS -->
+  <div class="bulk-bar" id="bulkBar">
+    <span id="bulkCount">0 selezionati</span>
+    <button class="btn btn-danger btn-sm" onclick="deleteSelected()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Elimina selezionati
+    </button>
+  </div>
+
+  <!-- KANBAN VIEW -->
+  <div class="kanban" id="kanbanView"></div>
+
+  <!-- LIST VIEW -->
+  <div class="list-view" id="listView">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+          <th onclick="sortList('nome')">Nome <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('cognome')">Cognome <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('telefono')">Telefono <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('email')">Email <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('fonte')">Fonte <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('stato')">Stato <span class="sort-icon">↕</span></th>
+          <th onclick="sortList('dataCreazione')">Data <span class="sort-icon">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== MODAL: IMPORT EXCEL ========== -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal modal-lg">
+    <h2>Importa Lead da Excel</h2>
+    <div id="importStep1">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Trascina il file .xlsx qui o clicca per selezionarlo</p>
+        <p class="hint">Formato accettato: .xlsx — Usa il template scaricabile</p>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx" style="display:none" onchange="handleFileSelect(this)">
+    </div>
+    <div id="importStep2" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;" id="importFileName"></span>
+        <span class="error-msg" id="importErrors"></span>
+      </div>
+      <div style="max-height:350px;overflow:auto;">
+        <table class="preview-table" id="previewTable">
+          <thead><tr><th>#</th><th>Nome</th><th>Cognome</th><th>Telefono</th><th>Email</th><th>Fonte</th><th>Note</th><th>Stato</th></tr></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('importModal'); resetImport();">Annulla</button>
+      <button class="btn btn-primary" id="btnConfirmImport" style="display:none" onclick="confirmImport()">Importa Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: CONFERMA ELIMINAZIONE ========== -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>Conferma eliminazione</h2>
+    <p style="font-size:14px;color:#64748b;margin-bottom:6px;" id="deleteMessage">Sei sicuro? Questa azione è irreversibile.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== LEAD DETAIL PANEL ========== -->
+<div class="lead-detail-overlay" id="leadOverlay" onclick="closeLeadDetail()"></div>
+<div class="lead-detail" id="leadDetail">
+  <div class="lead-detail-header">
+    <h2 id="detailTitle">Nuovo Lead</h2>
+    <button class="lead-detail-close" onclick="closeLeadDetail()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="lead-detail-body">
+    <!-- AZIONI RAPIDE -->
+    <div class="lead-detail-actions" id="detailActions" style="display:none">
+      <select id="detailStatoSelect" class="btn btn-sm btn-secondary" onchange="changeLeadStato(this.value)" style="font-weight:600;"></select>
+      <button class="btn btn-sm btn-whatsapp" onclick="sendWhatsApp()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 0 0 .613.613l4.458-1.495A11.952 11.952 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.352 0-4.55-.752-6.338-2.034l-.442-.332-3.263 1.093 1.093-3.263-.332-.442A9.955 9.955 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+        WhatsApp
+      </button>
+      <button class="btn btn-sm btn-secondary" onclick="sendEmail()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </button>
+      <button class="btn btn-sm btn-secondary" onclick="callLead()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Chiama
+      </button>
+      <button class="btn btn-sm btn-danger" onclick="deleteSingleLead()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Elimina
+      </button>
+    </div>
+
+    <!-- FORM ANAGRAFICA -->
+    <div class="lead-section">
+      <h3>Anagrafica</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="required">Nome</label>
+          <input type="text" id="leadNome">
+        </div>
+        <div class="form-group">
+          <label class="required">Cognome</label>
+          <input type="text" id="leadCognome">
+        </div>
+        <div class="form-group">
+          <label class="required">Telefono</label>
+          <input type="tel" id="leadTelefono">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="leadEmail">
+        </div>
+        <div class="form-group">
+          <label>Fonte</label>
+          <select id="leadFonte"><option value="">Seleziona...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Priorità</label>
+          <select id="leadPriorita">
+            <option value="">Nessuna</option>
+            <option value="bassa">Bassa</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Provincia</label>
+          <input type="text" id="leadProvincia">
+        </div>
+        <div class="form-group">
+          <label>È minore?</label>
+          <select id="leadIsMinore" onchange="toggleGenitore()">
+            <option value="false">No</option>
+            <option value="true">Sì</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Note</label>
+          <textarea id="leadNote" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENITORE (condizionale) -->
+    <div class="lead-section" id="genitoreSection" style="display:none">
+      <h3>Dati Genitore / Tutore</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Nome genitore</label><input type="text" id="genNome"></div>
+        <div class="form-group"><label>Cognome genitore</label><input type="text" id="genCognome"></div>
+        <div class="form-group"><label>Telefono genitore</label><input type="tel" id="genTelefono"></div>
+        <div class="form-group"><label>Email genitore</label><input type="email" id="genEmail"></div>
+      </div>
+    </div>
+
+    <!-- STORICO STATI -->
+    <div class="lead-section" id="storicoSection" style="display:none">
+      <h3>Storico Stati</h3>
+      <div class="timeline" id="storicoTimeline"></div>
+    </div>
+
+    <!-- SAVE -->
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-secondary" onclick="closeLeadDetail()">Annulla</button>
+      <button class="btn btn-success" onclick="saveLead()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div class="toast" id="toast"></div>
+
+<!-- ========== FIREBASE SDK ========== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- ========== XLSX (SheetJS) ========== -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════
+// FIREBASE CONFIG — INSERISCI LE TUE CREDENZIALI
+// ═══════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "LA_TUA_API_KEY",
+  authDomain: "IL_TUO_AUTH_DOMAIN",
+  projectId: "IL_TUO_PROJECT_ID",
+  storageBucket: "IL_TUO_STORAGE_BUCKET",
+  messagingSenderId: "IL_TUO_SENDER_ID",
+  appId: "IL_TUO_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let allLeads = [];
+let allStati = [];
+let allFonti = [];
+let currentView = 'kanban';
+let selectedLeads = new Set();
+let currentLeadId = null;
+let importData = [];
+let sortField = 'dataCreazione';
+let sortDir = 'desc';
+let deleteCallback = null;
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadStati();
+  await loadFonti();
+  listenLeads();
+  setupDropzone();
+});
+
+// ═══════════════════════════════════════
+// LOAD IMPOSTAZIONI
+// ═══════════════════════════════════════
+async function loadStati() {
+  const snap = await db.collection('impostazioni').doc('stati').collection('items').orderBy('posizione').get();
+  allStati = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Popola filtro stato
+  const sel = document.getElementById('filterStato');
+  sel.innerHTML = '<option value="">Tutti gli stati</option>';
+  allStati.forEach(s => {
+    sel.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
+  });
+  // Popola select stato nel detail
+  const detSel = document.getElementById('detailStatoSelect');
+  detSel.innerHTML = '';
+  allStati.forEach(s => {
+    detSel.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
+  });
+}
+
+async function loadFonti() {
+  const snap = await db.collection('impostazioni').doc('fonti').collection('items').orderBy('posizione').get();
+  allFonti = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Filtro
+  const sel = document.getElementById('filterFonte');
+  sel.innerHTML = '<option value="">Tutte le fonti</option>';
+  allFonti.forEach(f => {
+    sel.innerHTML += `<option value="${f.nome}">${f.nome}</option>`;
+  });
+  // Form
+  const formSel = document.getElementById('leadFonte');
+  formSel.innerHTML = '<option value="">Seleziona...</option>';
+  allFonti.forEach(f => {
+    formSel.innerHTML += `<option value="${f.nome}">${f.nome}</option>`;
+  });
+}
+
+// ═══════════════════════════════════════
+// LISTEN LEADS (REAL-TIME)
+// ═══════════════════════════════════════
+function listenLeads() {
+  db.collection('leads').orderBy('dataCreazione', 'desc').onSnapshot(snap => {
+    allLeads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  });
+}
+
+// ═══════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════
+function handlePeriodChange() {
+  const v = document.getElementById('filterPeriodo').value;
+  document.getElementById('dateRange').classList.toggle('visible', v === 'personalizzato');
+  applyFilters();
+}
+
+function getFilteredLeads() {
+  let leads = [...allLeads];
+  // Periodo
+  const periodo = document.getElementById('filterPeriodo').value;
+  const now = new Date();
+  let startDate = null;
+  if (periodo === 'mese') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (periodo === 'trimestre') {
+    startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  } else if (periodo === 'semestre') {
+    startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  } else if (periodo === 'anno') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  } else if (periodo === 'personalizzato') {
+    const da = document.getElementById('filterDa').value;
+    const a = document.getElementById('filterA').value;
+    if (da) startDate = new Date(da);
+    if (a) {
+      const endDate = new Date(a);
+      endDate.setHours(23, 59, 59);
+      leads = leads.filter(l => {
+        const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
+        return d <= endDate;
+      });
+    }
+  }
+  // tutti = no filter
+  if (startDate) {
+    leads = leads.filter(l => {
+      const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
+      return d >= startDate;
+    });
+  }
+  // Fonte
+  const fonte = document.getElementById('filterFonte').value;
+  if (fonte) leads = leads.filter(l => l.fonte === fonte);
+  // Stato
+  const stato = document.getElementById('filterStato').value;
+  if (stato) leads = leads.filter(l => l.stato === stato);
+  // Ricerca
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (q) {
+    leads = leads.filter(l =>
+      (l.nome || '').toLowerCase().includes(q) ||
+      (l.cognome || '').toLowerCase().includes(q) ||
+      (l.telefono || '').toLowerCase().includes(q) ||
+      (l.email || '').toLowerCase().includes(q)
+    );
+  }
+  return leads;
+}
+
+function applyFilters() {
+  render();
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  selectedLeads.clear();
+  updateBulkBar();
+  if (currentView === 'kanban') renderKanban();
+  else renderList();
+}
+
+// ═══════════════════════════════════════
+// KANBAN
+// ═══════════════════════════════════════
+function renderKanban() {
+  const container = document.getElementById('kanbanView');
+  const leads = getFilteredLeads();
+  container.innerHTML = '';
+
+  allStati.forEach(stato => {
+    const colLeads = leads.filter(l => l.stato === stato.nome);
+    const col = document.createElement('div');
+    col.className = 'kanban-column';
+    col.dataset.stato = stato.nome;
+
+    // Header
+    const headerBg = stato.colore + '20';
+    col.innerHTML = `
+      <div class="kanban-header" style="background:${headerBg}">
+        <span class="kanban-header-title" style="color:${stato.colore}">${stato.nome}</span>
+        <span class="kanban-header-count" style="color:${stato.colore}">${colLeads.length}</span>
+      </div>
+    `;
+    
+    const body = document.createElement('div');
+    body.className = 'kanban-body';
+    body.dataset.stato = stato.nome;
+
+    // Drag & drop events
+    body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('drag-over'); });
+    body.addEventListener('dragleave', () => body.classList.remove('drag-over'));
+    body.addEventListener('drop', e => {
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      const leadId = e.dataTransfer.getData('text/plain');
+      const newStato = body.dataset.stato;
+      moveLeadToStato(leadId, newStato);
+    });
+
+    colLeads.forEach(lead => {
+      const card = document.createElement('div');
+      card.className = 'kanban-card';
+      card.draggable = true;
+      card.dataset.id = lead.id;
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', lead.id);
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+      const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
+      const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+
+      card.innerHTML = `
+        <input type="checkbox" class="kanban-card-check" data-id="${lead.id}" onclick="event.stopPropagation(); toggleSelect('${lead.id}')">
+        <div class="kanban-card-name" onclick="openLeadDetail('${lead.id}')">${lead.nome} ${lead.cognome}</div>
+        <div class="kanban-card-phone">${lead.telefono || ''}</div>
+        <div class="kanban-card-meta">
+          ${lead.fonte ? `<span class="kanban-card-fonte">${lead.fonte}</span>` : '<span></span>'}
+          <span class="kanban-card-date">${dateStr}</span>
+        </div>
+      `;
+      body.appendChild(card);
+    });
+
+    col.appendChild(body);
+    container.appendChild(col);
+  });
+}
+
+// ═══════════════════════════════════════
+// LIST
+// ═══════════════════════════════════════
+function renderList() {
+  const tbody = document.getElementById('listBody');
+  let leads = getFilteredLeads();
+
+  // Sort
+  leads.sort((a, b) => {
+    let va = a[sortField] || '';
+    let vb = b[sortField] || '';
+    if (sortField === 'dataCreazione') {
+      va = va?.toDate ? va.toDate().getTime() : new Date(va).getTime();
+      vb = vb?.toDate ? vb.toDate().getTime() : new Date(vb).getTime();
+    }
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  tbody.innerHTML = '';
+  leads.forEach(lead => {
+    const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
+    const dateStr = date.toLocaleDateString('it-IT');
+    const stato = allStati.find(s => s.nome === lead.stato);
+    const badgeBg = stato ? stato.colore + '20' : '#f1f5f9';
+    const badgeColor = stato ? stato.colore : '#64748b';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" data-id="${lead.id}" onchange="toggleSelect('${lead.id}')" ${selectedLeads.has(lead.id) ? 'checked' : ''}></td>
+      <td>${lead.nome || ''}</td>
+      <td>${lead.cognome || ''}</td>
+      <td>${lead.telefono || ''}</td>
+      <td>${lead.email || ''}</td>
+      <td>${lead.fonte || ''}</td>
+      <td><span class="badge" style="background:${badgeBg};color:${badgeColor}">${lead.stato || ''}</span></td>
+      <td>${dateStr}</td>
+    `;
+    tr.addEventListener('click', e => {
+      if (e.target.type === 'checkbox') return;
+      openLeadDetail(lead.id);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function sortList(field) {
+  if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortField = field; sortDir = 'asc'; }
+  renderList();
+}
+
+// ═══════════════════════════════════════
+// VIEW TOGGLE
+// ═══════════════════════════════════════
+function setView(view) {
+  currentView = view;
+  document.getElementById('btnKanban').classList.toggle('active', view === 'kanban');
+  document.getElementById('btnElenco').classList.toggle('active', view === 'elenco');
+  document.getElementById('kanbanView').style.display = view === 'kanban' ? 'flex' : 'none';
+  document.getElementById('listView').style.display = view === 'elenco' ? 'block' : 'none';
+  render();
+}
+
+// ═══════════════════════════════════════
+// SELECTION
+// ═══════════════════════════════════════
+function toggleSelect(id) {
+  if (selectedLeads.has(id)) selectedLeads.delete(id);
+  else selectedLeads.add(id);
+  updateBulkBar();
+  // Sync checkboxes
+  document.querySelectorAll(`input[data-id="${id}"]`).forEach(cb => cb.checked = selectedLeads.has(id));
+}
+
+function toggleSelectAll(cb) {
+  const leads = getFilteredLeads();
+  if (cb.checked) leads.forEach(l => selectedLeads.add(l.id));
+  else selectedLeads.clear();
+  updateBulkBar();
+  renderList();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  const count = selectedLeads.size;
+  document.getElementById('bulkCount').textContent = `${count} selezionat${count === 1 ? 'o' : 'i'}`;
+  bar.classList.toggle('visible', count > 0);
+}
+
+// ═══════════════════════════════════════
+// DRAG & DROP → CHANGE STATO
+// ═══════════════════════════════════════
+async function moveLeadToStato(leadId, newStato) {
+  const lead = allLeads.find(l => l.id === leadId);
+  if (!lead || lead.stato === newStato) return;
+  const oldStato = lead.stato;
+  // Update lead
+  await db.collection('leads').doc(leadId).update({ stato: newStato });
+  // Add storico
+  await db.collection('leads').doc(leadId).collection('storicoStati').add({
+    statoPrecedente: oldStato,
+    statoNuovo: newStato,
+    data: firebase.firestore.FieldValue.serverTimestamp(),
+    origine: 'Cambio manuale'
+  });
+  showToast(`Stato aggiornato: ${oldStato} → ${newStato}`, 'success');
+}
+
+// ═══════════════════════════════════════
+// LEAD DETAIL PANEL
+// ═══════════════════════════════════════
+function openNewLead() {
+  currentLeadId = null;
+  document.getElementById('detailTitle').textContent = 'Nuovo Lead';
+  document.getElementById('detailActions').style.display = 'none';
+  document.getElementById('storicoSection').style.display = 'none';
+  clearForm();
+  openPanel();
+}
+
+async function openLeadDetail(id) {
+  currentLeadId = id;
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+
+  document.getElementById('detailTitle').textContent = `${lead.nome} ${lead.cognome}`;
+  document.getElementById('detailActions').style.display = 'flex';
+
+  // Fill form
+  document.getElementById('leadNome').value = lead.nome || '';
+  document.getElementById('leadCognome').value = lead.cognome || '';
+  document.getElementById('leadTelefono').value = lead.telefono || '';
+  document.getElementById('leadEmail').value = lead.email || '';
+  document.getElementById('leadFonte').value = lead.fonte || '';
+  document.getElementById('leadPriorita').value = lead.priorita || '';
+  document.getElementById('leadProvincia').value = lead.provincia || '';
+  document.getElementById('leadIsMinore').value = lead.isMinore ? 'true' : 'false';
+  document.getElementById('leadNote').value = lead.note || '';
+  document.getElementById('detailStatoSelect').value = lead.stato || 'Nuovo';
+
+  // Genitore
+  toggleGenitore();
+  if (lead.genitore) {
+    document.getElementById('genNome').value = lead.genitore.nome || '';
+    document.getElementById('genCognome').value = lead.genitore.cognome || '';
+    document.getElementById('genTelefono').value = lead.genitore.telefono || '';
+    document.getElementById('genEmail').value = lead.genitore.email || '';
+  }
+
+  // Storico
+  document.getElementById('storicoSection').style.display = 'block';
+  await loadStorico(id);
+
+  openPanel();
+}
+
+async function loadStorico(leadId) {
+  const snap = await db.collection('leads').doc(leadId).collection('storicoStati').orderBy('data', 'desc').get();
+  const timeline = document.getElementById('storicoTimeline');
+  timeline.innerHTML = '';
+  snap.docs.forEach(d => {
+    const s = d.data();
+    const date = s.data?.toDate ? s.data.toDate() : new Date();
+    const statoObj = allStati.find(st => st.nome === s.statoNuovo);
+    const color = statoObj ? statoObj.colore : '#94a3b8';
+    timeline.innerHTML += `
+      <div class="timeline-item" style="border-left-color:${color}">
+        <div class="ti-content">
+          <div class="ti-value">${s.statoPrecedente || '—'} → ${s.statoNuovo}</div>
+          <div class="ti-label">${s.origine || ''}</div>
+        </div>
+        <div class="ti-date">${date.toLocaleDateString('it-IT')} ${date.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    `;
+  });
+  if (snap.empty) {
+    timeline.innerHTML = '<p style="font-size:12px;color:#94a3b8;">Nessun cambio di stato registrato.</p>';
+  }
+}
+
+function openPanel() {
+  document.getElementById('leadOverlay').classList.add('open');
+  document.getElementById('leadDetail').classList.add('open');
+}
+
+function closeLeadDetail() {
+  document.getElementById('leadOverlay').classList.remove('open');
+  document.getElementById('leadDetail').classList.remove('open');
+  currentLeadId = null;
+}
+
+function clearForm() {
+  ['leadNome','leadCognome','leadTelefono','leadEmail','leadProvincia','leadNote','genNome','genCognome','genTelefono','genEmail'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('leadFonte').value = '';
+  document.getElementById('leadPriorita').value = '';
+  document.getElementById('leadIsMinore').value = 'false';
+  document.getElementById('genitoreSection').style.display = 'none';
+}
+
+function toggleGenitore() {
+  const isMinore = document.getElementById('leadIsMinore').value === 'true';
+  document.getElementById('genitoreSection').style.display = isMinore ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════
+// SAVE LEAD
+// ═══════════════════════════════════════
+async function saveLead() {
+  const nome = document.getElementById('leadNome').value.trim();
+  const cognome = document.getElementById('leadCognome').value.trim();
+  const telefono = document.getElementById('leadTelefono').value.trim();
+
+  if (!nome || !cognome || !telefono) {
+    showToast('Nome, Cognome e Telefono sono obbligatori', 'error');
+    return;
+  }
+
+  const data = {
+    nome, cognome, telefono,
+    email: document.getElementById('leadEmail').value.trim(),
+    fonte: document.getElementById('leadFonte').value,
+    priorita: document.getElementById('leadPriorita').value,
+    provincia: document.getElementById('leadProvincia').value.trim(),
+    isMinore: document.getElementById('leadIsMinore').value === 'true',
+    note: document.getElementById('leadNote').value.trim(),
+  };
+
+  if (data.isMinore) {
+    data.genitore = {
+      nome: document.getElementById('genNome').value.trim(),
+      cognome: document.getElementById('genCognome').value.trim(),
+      telefono: document.getElementById('genTelefono').value.trim(),
+      email: document.getElementById('genEmail').value.trim(),
+    };
+  }
+
+  try {
+    if (currentLeadId) {
+      // Update
+      await db.collection('leads').doc(currentLeadId).update(data);
+      showToast('Lead aggiornato!', 'success');
+    } else {
+      // Create
+      data.stato = 'Nuovo';
+      data.dataCreazione = firebase.firestore.FieldValue.serverTimestamp();
+      const ref = await db.collection('leads').add(data);
+      // Storico iniziale
+      await db.collection('leads').doc(ref.id).collection('storicoStati').add({
+        statoPrecedente: null,
+        statoNuovo: 'Nuovo',
+        data: firebase.firestore.FieldValue.serverTimestamp(),
+        origine: 'Creazione manuale'
+      });
+      showToast('Lead creato!', 'success');
+    }
+    closeLeadDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Errore nel salvataggio', 'error');
+  }
+}
+
+// ═══════════════════════════════════════
+// CHANGE STATO FROM DETAIL
+// ═══════════════════════════════════════
+async function changeLeadStato(newStato) {
+  if (!currentLeadId) return;
+  const lead = allLeads.find(l => l.id === currentLeadId);
+  if (!lead || lead.stato === newStato) return;
+  await moveLeadToStato(currentLeadId, newStato);
+  // Refresh storico
+  await loadStorico(currentLeadId);
+}
+
+// ═══════════════════════════════════════
+// QUICK ACTIONS
+// ═══════════════════════════════════════
+function sendWhatsApp() {
+  const tel = document.getElementById('leadTelefono').value.replace(/\D/g, '');
+  if (tel) window.open(`https://wa.me/39${tel}`, '_blank');
+}
+function sendEmail() {
+  const email = document.getElementById('leadEmail').value;
+  if (email) window.open(`mailto:${email}`);
+}
+function callLead() {
+  const tel = document.getElementById('leadTelefono').value;
+  if (tel) window.open(`tel:${tel}`);
+}
+
+// ═══════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════
+function deleteSingleLead() {
+  if (!currentLeadId) return;
+  document.getElementById('deleteMessage').textContent = 'Sei sicuro di voler eliminare questo lead? Questa azione è irreversibile.';
+  deleteCallback = async () => {
+    await db.collection('leads').doc(currentLeadId).delete();
+    closeLeadDetail();
+    showToast('Lead eliminato', 'info');
+  };
+  openModal('deleteModal');
+}
+
+function deleteSelected() {
+  const count = selectedLeads.size;
+  if (count === 0) return;
+  document.getElementById('deleteMessage').textContent = `Sei sicuro di voler eliminare ${count} lead? Questa azione è irreversibile.`;
+  deleteCallback = async () => {
+    const batch = db.batch();
+    selectedLeads.forEach(id => batch.delete(db.collection('leads').doc(id)));
+    await batch.commit();
+    selectedLeads.clear();
+    updateBulkBar();
+    showToast(`${count} lead eliminati`, 'info');
+  };
+  openModal('deleteModal');
+}
+
+async function confirmDelete() {
+  if (deleteCallback) await deleteCallback();
+  deleteCallback = null;
+  closeModal('deleteModal');
+}
+
+// ═══════════════════════════════════════
+// IMPORT EXCEL
+// ═══════════════════════════════════════
+function setupDropzone() {
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) parseExcel(file);
+  });
+}
+
+function handleFileSelect(input) {
+  if (input.files[0]) parseExcel(input.files[0]);
+}
+
+function parseExcel(file) {
+  document.getElementById('importFileName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      importData = [];
+      let errors = 0;
+      const previewBody = document.getElementById('previewBody');
+      previewBody.innerHTML = '';
+
+      json.forEach((row, i) => {
+        const nome = (row['Nome'] || row['nome'] || '').toString().trim();
+        const cognome = (row['Cognome'] || row['cognome'] || '').toString().trim();
+        const telefono = (row['Telefono'] || row['telefono'] || '').toString().trim();
+        const email = (row['Email'] || row['email'] || '').toString().trim();
+        const fonte = (row['Fonte'] || row['fonte'] || '').toString().trim();
+        const note = (row['Note'] || row['note'] || '').toString().trim();
+        const valid = nome && cognome && telefono;
+        if (!valid) errors++;
+
+        importData.push({ nome, cognome, telefono, email, fonte, note, valid });
+
+        const tr = document.createElement('tr');
+        if (!valid) tr.className = 'error';
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${nome || '<em style="color:#ef4444">mancante</em>'}</td>
+          <td>${cognome || '<em style="color:#ef4444">mancante</em>'}</td>
+          <td>${telefono || '<em style="color:#ef4444">mancante</em>'}</td>
+          <td>${email}</td><td>${fonte}</td><td>${note}</td>
+          <td>${valid ? '✓' : '<span style="color:#ef4444">✗ Campi obbligatori mancanti</span>'}</td>
+        `;
+        previewBody.appendChild(tr);
+      });
+
+      document.getElementById('importErrors').textContent = errors > 0 ? `${errors} righe con errori (verranno saltate)` : '';
+      document.getElementById('importStep1').style.display = 'none';
+      document.getElementById('importStep2').style.display = 'block';
+      document.getElementById('btnConfirmImport').style.display = 'inline-flex';
+
+    } catch(err) {
+      showToast('Errore nella lettura del file', 'error');
+      console.error(err);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+async function confirmImport() {
+  const validRows = importData.filter(r => r.valid);
+  if (validRows.length === 0) {
+    showToast('Nessuna riga valida da importare', 'error');
+    return;
+  }
+
+  try {
+    for (const row of validRows) {
+      const ref = await db.collection('leads').add({
+        nome: row.nome,
+        cognome: row.cognome,
+        telefono: row.telefono,
+        email: row.email,
+        fonte: row.fonte,
+        note: row.note,
+        stato: 'Nuovo',
+        dataCreazione: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db.collection('leads').doc(ref.id).collection('storicoStati').add({
+        statoPrecedente: null,
+        statoNuovo: 'Nuovo',
+        data: firebase.firestore.FieldValue.serverTimestamp(),
+        origine: 'Import Excel'
+      });
+    }
+    showToast(`${validRows.length} lead importati con successo!`, 'success');
+    closeModal('importModal');
+    resetImport();
+  } catch(err) {
+    showToast('Errore durante l\'import', 'error');
+    console.error(err);
+  }
+}
+
+function resetImport() {
+  importData = [];
+  document.getElementById('importStep1').style.display = 'block';
+  document.getElementById('importStep2').style.display = 'none';
+  document.getElementById('btnConfirmImport').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+}
+
+// ═══════════════════════════════════════
+// DOWNLOAD TEMPLATE EXCEL
+// ═══════════════════════════════════════
+function downloadTemplate() {
+  const data = [
+    { Nome: 'Mario', Cognome: 'Rossi', Telefono: '3331234567', Email: 'mario@email.com', Fonte: 'Sito Web', Note: 'Interessato al corso AFM' }
+  ];
+  const ws = XLSX.utils.json_to_sheet(data);
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 30 }
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template Lead');
+  XLSX.writeFile(wb, 'Template_Import_Lead.xlsx');
+}
+
+// ═══════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
