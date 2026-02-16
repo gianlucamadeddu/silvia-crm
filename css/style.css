@@ -767,7 +767,7 @@ body {
 .kanban-col {
   min-width: 130px;
   max-width: 150px;
-  flex: 1;
+  flex: none;
   background: var(--bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
