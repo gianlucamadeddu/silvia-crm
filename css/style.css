@@ -1,0 +1,623 @@
+/* ============================================
+   SILVIA CRM — Design System
+   ============================================ */
+
+/* === RESET & BASE === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #1e40af;
+  --primary-dark: #1e3a8a;
+  --primary-light: #dbeafe;
+  --green: #22c55e;
+  --green-light: #dcfce7;
+  --orange: #f59e0b;
+  --orange-light: #fef9c3;
+  --red: #ef4444;
+  --red-light: #fce7f3;
+  --pink-light: #fce7f3;
+  --border: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === LOGIN PAGE === */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.login-payoff {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  margin-bottom: 32px;
+  font-weight: 500;
+}
+
+.login-card .form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.login-card label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text);
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.login-card input:focus {
+  border-color: var(--primary);
+}
+
+.login-error {
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+/* === BOTTONI === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 15px;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: #16a34a; }
+
+.btn-red { background: var(--red); color: white; }
+.btn-red:hover { background: #dc2626; }
+
+.btn-whatsapp { background: #25d366; color: white; }
+.btn-whatsapp:hover { background: #1ebe5d; }
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.btn-secondary:hover { background: var(--bg); }
+
+/* === APP LAYOUT === */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  width: 250px;
+  background: var(--white);
+  border-right: 1.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.sidebar-logo {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.sidebar-payoff {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--white);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+}
+
+.nav-item:hover {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(30,64,175,0.3);
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-secondary);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.nav-item:hover svg { stroke: var(--text); }
+.nav-item.active svg { stroke: white; }
+
+/* === MAIN CONTENT === */
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 28px 32px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* === CARDS === */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+/* === BADGE STATO === */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* === FORM INPUTS === */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+}
+
+/* === MOBILE === */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--white);
+  border-bottom: 1.5px solid var(--border);
+  align-items: center;
+  padding: 0 16px;
+  z-index: 99;
+}
+
+.mobile-header .sidebar-logo {
+  font-size: 20px;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--text);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+    gap: 12px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 72px 16px 24px;
+  }
+}
+
+/* ============================================
+   DASHBOARD — Modulo 1
+   ============================================ */
+
+/* === FILTRO PERIODO === */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter-bar label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-bar select,
+.filter-bar input[type="date"] {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.filter-bar select:focus,
+.filter-bar input[type="date"]:focus {
+  border-color: var(--primary);
+}
+
+.custom-dates {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-dates.visible { display: flex; }
+
+/* === CONTATORI === */
+.counters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.counter-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.counter-card:hover { box-shadow: var(--shadow-md); }
+
+.counter-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.counter-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.counter-info { display: flex; flex-direction: column; }
+
+.counter-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.counter-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* === SEZIONI GRID === */
+.sections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.section-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.section-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.section-card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-card-header span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.section-card-body { padding: 0; }
+
+.section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.section-row:last-child { border-bottom: none; }
+.section-row:hover { background: var(--bg); }
+
+.section-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.section-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.section-row-detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.section-row-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* === EMPTY STATE === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.35;
+  stroke: var(--text-secondary);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+/* === LOADING SPINNER === */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* === RESPONSIVE DASHBOARD === */
+@media (max-width: 1100px) {
+  .counters-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .counters-grid { grid-template-columns: repeat(2, 1fr); }
+  .sections-grid { grid-template-columns: 1fr; }
+}
