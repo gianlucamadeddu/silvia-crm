@@ -919,55 +919,12 @@
     }
 
     function openNewLead() {
-      currentLeadId = null;
-      document.getElementById('leadPanelTitle').textContent = 'Nuovo Lead';
-      const fontiOpts = allFonti.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
-      const statiOpts = allStati.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
-
-      document.getElementById('leadPanelBody').innerHTML = `
-        <div class="lead-section">
-          <h3 class="lead-section-title">Anagrafica</h3>
-          <div class="lead-form-grid">
-            <div class="form-group"><label class="required">Nome</label><input type="text" id="fNome"></div>
-            <div class="form-group"><label class="required">Cognome</label><input type="text" id="fCognome"></div>
-            <div class="form-group"><label class="required">Telefono</label><input type="tel" id="fTelefono"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="fEmail"></div>
-            <div class="form-group"><label>Fonte</label><select id="fFonte"><option value="">Seleziona...</option>${fontiOpts}</select></div>
-            <div class="form-group"><label>Priorità</label><select id="fPriorita"><option value="">Nessuna</option><option value="bassa">Bassa</option><option value="media">Media</option><option value="alta">Alta</option></select></div>
-            <div class="form-group"><label>Provincia</label><input type="text" id="fProvincia"></div>
-            <div class="form-group"><label>È minore?</label><select id="fIsMinore"><option value="false">No</option><option value="true">Sì</option></select></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Note</label><textarea id="fNote" rows="2"></textarea></div>
-          </div>
-        </div>
-        <div class="lead-section" id="genitoreSection" style="display:none">
-          <h3 class="lead-section-title">Dati Genitore / Tutore</h3>
-          <div class="lead-form-grid">
-            <div class="form-group"><label>Nome</label><input type="text" id="fGenNome"></div>
-            <div class="form-group"><label>Cognome</label><input type="text" id="fGenCognome"></div>
-            <div class="form-group"><label>Telefono</label><input type="tel" id="fGenTelefono"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="fGenEmail"></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-          <button class="btn btn-secondary" id="btnCancelLead">Annulla</button>
-          <button class="btn btn-green" id="btnSaveLead">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Salva
-          </button>
-        </div>
-      `;
-
-      document.getElementById('fIsMinore').addEventListener('change', function () {
-        document.getElementById('genitoreSection').style.display = this.value === 'true' ? 'block' : 'none';
-      });
-      document.getElementById('btnCancelLead').addEventListener('click', closeLeadPanel);
-      document.getElementById('btnSaveLead').addEventListener('click', saveLead);
-      openLeadPanel();
-    }
+  window.location.href = 'lead-detail.html?id=new';
+}
 
     async function openLeadDetail(id) {
-      currentLeadId = id;
-      const lead = allLeads.find(l => l.id === id);
+  window.location.href = 'lead-detail.html?id=' + id;
+}
       if (!lead) return;
 
       document.getElementById('leadPanelTitle').textContent = `${lead.nome} ${lead.cognome}`;
