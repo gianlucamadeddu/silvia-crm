@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silvia CRM — Seed Database</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .seed-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .seed-card h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+    .seed-card p {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+    .seed-btn {
+      background: #1e40af;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .seed-btn:hover { background: #1e3a8a; }
+    .seed-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    #log {
+      margin-top: 24px;
+      text-align: left;
+      font-size: 13px;
+      color: #1e293b;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 16px;
+      display: none;
+    }
+    #log .ok { color: #22c55e; font-weight: 500; }
+    #log .err { color: #ef4444; font-weight: 500; }
+    #log .done { color: #1e40af; font-weight: 700; font-size: 14px; margin-top: 8px; }
+    #log div { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="seed-card">
+    <h1>SILVIA</h1>
+    <p>Inizializzazione Database — Esegui una sola volta</p>
+    <button class="seed-btn" id="seedBtn">Popola Database</button>
+    <div id="log"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuYeUI9sNaoXpQCkN_XrXOF34VGWN7oTI",
+      authDomain: "silvia-crm-ce19b.firebaseapp.com",
+      projectId: "silvia-crm-ce19b",
+      storageBucket: "silvia-crm-ce19b.firebasestorage.app",
+      messagingSenderId: "1041049614523",
+      appId: "1:1041049614523:web:250bd3bc60ffbcfe32119e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const logEl = document.getElementById('log');
+    const seedBtn = document.getElementById('seedBtn');
+
+    function log(msg, type = 'ok') {
+      logEl.style.display = 'block';
+      logEl.innerHTML += `<div class="${type}">${msg}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    const STATI = [
+      { nome: "Nuovo", colore: "#22c55e", posizione: 0, eliminabile: false }
+    ];
+
+    const CORSI = [
+      "AFM (ING-SPA)", "AFM (ING-FRA)", "AFM-SIA",
+      "ALBERGHIERO ENO (ING-SPA)", "ALBERGHIERO ENO (ING-FRA)",
+      "ALBERGHIERO SALA-ACCOG. (ING-SPA)", "ALBERGHIERO SALA-ACCOG. (ING-FRA)",
+      "ALBERGHIERO PASTICCERIA",
+      "COSTRUZIONI AMBIENTE E TERRITORIO",
+      "ELETTRONICA ED ELETTROT.",
+      "INFORMATICA E TELECOMUNICAZIONI",
+      "LICEO CLASSICO", "LICEO LINGUISTICO", "LICEO SCIENZE UMANE",
+      "LICEO ECON. – SOCIALE (ING-SPA)", "LICEO ECON. – SOCIALE (ING-FRA)",
+      "LICEO MADE IN ITALY", "LICEO SCIENTIFICO", "LICEO SCIENZE APPLICATE",
+      "MECCANICA E MECCATRONICA", "MODA",
+      "NAUTICO CAPITANO", "NAUTICO MACCHINISTA",
+      "OTTICO", "ODONTOIATRICO",
+      "RIM-TURISTICO",
+      "SERVIZI SOCIALI (ING-SPA)", "SERVIZI SOCIALI (ING-FRA)"
+    ];
+
+    const SCUOLE = [
+      "KOLBE – NOLA",
+      "INTELIGHENTIA – SARNO",
+      "INTELLIGHENTIA – BRACIGLIANO",
+      "INTELLIGHENTIA – ANGRI",
+      "PIRANDELLO – NOCERA INFERIORE",
+      "VOLTA – ORTA DI ATELLA",
+      "G. VERGA – FRATTAMINORE",
+      "G. VERGA – ACERRA",
+      "A. VESPUCCI – FRATTAMAGGIORE"
+    ];
+
+    const MACRO_AREE = ["Idoneità", "Idoneità + Maturità", "Maturità"];
+    const SERVIZI = ["Frequenza in sede", "Frequenza online", "Senza Frequenza"];
+
+    async function seedCollection(collectionPath, items) {
+      const colRef = collection(db, ...collectionPath.split('/'));
+      const existing = await getDocs(colRef);
+      if (!existing.empty) {
+        log(`⚠ ${collectionPath} — già popolata (${existing.size} elementi), salto.`, 'err');
+        return;
+      }
+      for (let i = 0; i < items.length; i++) {
+        const item = typeof items[i] === 'string'
+          ? { nome: items[i], posizione: i }
+          : { ...items[i] };
+        await setDoc(doc(colRef), item);
+      }
+      log(`✓ ${collectionPath} — ${items.length} elementi inseriti`);
+    }
+
+    seedBtn.addEventListener('click', async () => {
+      seedBtn.disabled = true;
+      seedBtn.textContent = 'Popolamento in corso...';
+      try {
+        log('Inizio popolamento database...');
+        log('');
+        await seedCollection('impostazioni/stati/items', STATI);
+        await seedCollection('impostazioni/corsiStudi/items', CORSI);
+        await seedCollection('impostazioni/scuole/items', SCUOLE);
+        await seedCollection('impostazioni/macroAree/items', MACRO_AREE);
+        await seedCollection('impostazioni/servizi/items', SERVIZI);
+        log('');
+        log('✅ DATABASE POPOLATO CON SUCCESSO!', 'done');
+        log('Puoi chiudere questa pagina e aprire index.html', 'done');
+        seedBtn.textContent = 'Completato!';
+      } catch (error) {
+        log(`✗ ERRORE: ${error.message}`, 'err');
+        seedBtn.disabled = false;
+        seedBtn.textContent = 'Riprova';
+      }
+    });
+  </script>
+</body>
+</html>
