@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <!-- SheetJS per import/export Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -31,16 +30,13 @@
 
   <!-- ============ APP ============ -->
   <div id="appPage" class="app-container" style="display:none;">
-    <!-- Mobile Header -->
     <div class="mobile-header">
       <button class="hamburger" id="hamburgerBtn">
         <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div class="sidebar-logo">SILVIA</div>
     </div>
-    <!-- Overlay mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">SILVIA</div>
@@ -73,8 +69,6 @@
         </button>
       </nav>
     </aside>
-
-    <!-- Main Content -->
     <main class="main-content" id="mainContent"></main>
   </div>
 
@@ -142,23 +136,10 @@
       query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp
     } from './js/firebase-config.js';
 
-    // ============================================
-    // PAGE VERSION — previene race condition
-    // Ogni volta che cambi pagina, pageVersion aumenta.
-    // Le funzioni async controllano se la versione è
-    // ancora quella corrente prima di toccare il DOM.
-    // ============================================
-    let pageVersion = 0;
-    let currentPage = null;
-
-    // ============================================
-    // AUTENTICAZIONE
-    // ============================================
+    // ╔══════════════════════════════════════════════╗
+    // ║  SEZIONE 1 — TUTTE LE VARIABILI              ║
+    // ╚══════════════════════════════════════════════╝
     const CREDENTIALS = { id: "Silvia", password: "iosonosilvia@2026" };
-
-    // Dichiarato qui perché showPage() lo usa e viene chiamato subito
-    let leadUnsubscribe = null;
-    let currentLeadId = null;
 
     const loginPage = document.getElementById('loginPage');
     const appPage = document.getElementById('appPage');
@@ -166,16 +147,42 @@
     const loginError = document.getElementById('loginError');
     const loginIdEl = document.getElementById('loginId');
     const loginPasswordEl = document.getElementById('loginPassword');
+    const navItems = document.querySelectorAll('.nav-item');
+    const mainContent = document.getElementById('mainContent');
+    const sidebarEl = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const leadOverlay = document.getElementById('leadOverlay');
+    const leadPanel = document.getElementById('leadPanel');
+    const leadPanelClose = document.getElementById('leadPanelClose');
+    const dropzone = document.getElementById('dropzone');
+    const importFileInput = document.getElementById('importFileInput');
 
-    if (sessionStorage.getItem('silvia_logged') === 'true') {
-      loginPage.style.display = 'none';
-      appPage.style.display = 'flex';
-      // showPage viene chiamato in fondo, dopo tutte le dichiarazioni
-    }
+    let pageVersion = 0;
+    let currentPage = null;
+    let leadUnsubscribe = null;
+    let currentLeadId = null;
+    let currentPeriod = 'month';
+    let allLeads = [];
+    let allStati = [];
+    let allFonti = [];
+    let leadCurrentView = 'kanban';
+    let selectedLeads = new Set();
+    let leadImportData = [];
+    let leadSortField = 'dataCreazione';
+    let leadSortDir = 'desc';
+    let deleteCallback = null;
 
-    loginBtn.addEventListener('click', doLogin);
-    loginPasswordEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
-    loginIdEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    const placeholderPages = {
+      agenda: { title: 'Agenda Calendario', subtitle: 'Appuntamenti e richiami' },
+      template: { title: 'Template', subtitle: 'Modelli WhatsApp ed Email' },
+      impostazioni: { title: 'Impostazioni', subtitle: 'Configura stati, fonti, corsi e altro' },
+      report: { title: 'Report', subtitle: 'Statistiche e estrazioni' }
+    };
+
+    // ╔══════════════════════════════════════════════╗
+    // ║  SEZIONE 2 — TUTTE LE FUNZIONI               ║
+    // ╚══════════════════════════════════════════════╝
 
     function doLogin() {
       const id = loginIdEl.value.trim();
@@ -193,49 +200,16 @@
       }
     }
 
-    // ============================================
-    // NAVIGAZIONE SIDEBAR
-    // ============================================
-    const navItems = document.querySelectorAll('.nav-item');
-    const mainContent = document.getElementById('mainContent');
-    const sidebarEl = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-    const placeholderPages = {
-      agenda: { title: 'Agenda Calendario', subtitle: 'Appuntamenti e richiami' },
-      template: { title: 'Template', subtitle: 'Modelli WhatsApp ed Email' },
-      impostazioni: { title: 'Impostazioni', subtitle: 'Configura stati, fonti, corsi e altro' },
-      report: { title: 'Report', subtitle: 'Statistiche e estrazioni' }
-    };
-
-    navItems.forEach(item => {
-      item.addEventListener('click', () => {
-        navItems.forEach(n => n.classList.remove('active'));
-        item.classList.add('active');
-        showPage(item.dataset.page);
-        sidebarEl.classList.remove('open');
-        sidebarOverlay.classList.remove('open');
-      });
-    });
-
-    // Listener real-time Lead (dichiarato in alto)
-
     function showPage(page) {
-      // ═══ FIX 1: Incrementa versione pagina ═══
       pageVersion++;
       currentPage = page;
-
-      // ═══ FIX 2: Chiudi panel/modal aperti ═══
       closeLeadPanel();
       closeModal('importModal');
       closeModal('deleteModal');
-
-      // ═══ FIX 3: Stacca listener lead se si esce ═══
       if (leadUnsubscribe && page !== 'lead') {
         leadUnsubscribe();
         leadUnsubscribe = null;
       }
-
       if (page === 'dashboard') {
         renderDashboard();
       } else if (page === 'lead') {
@@ -254,22 +228,6 @@
       }
     }
 
-    // ============================================
-    // MOBILE: HAMBURGER MENU
-    // ============================================
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    hamburgerBtn.addEventListener('click', () => {
-      sidebarEl.classList.toggle('open');
-      sidebarOverlay.classList.toggle('open');
-    });
-    sidebarOverlay.addEventListener('click', () => {
-      sidebarEl.classList.remove('open');
-      sidebarOverlay.classList.remove('open');
-    });
-
-    // ============================================
-    // TOAST
-    // ============================================
     function showToast(msg, type = 'info') {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -277,18 +235,31 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    // ============================================
-    // MODALS
-    // ============================================
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+    function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
 
-    // ============================================
-    //
+    function openLeadPanel() {
+      leadOverlay.classList.add('open');
+      leadPanel.classList.add('open');
+    }
+
+    function closeLeadPanel() {
+      leadOverlay.classList.remove('open');
+      leadPanel.classList.remove('open');
+      currentLeadId = null;
+    }
+
+    function openNewLead() {
+      window.location.href = 'lead-detail.html?id=new';
+    }
+
+    function openLeadDetail(id) {
+      window.location.href = 'lead-detail.html?id=' + id;
+    }
+
+    // ──────────────────────────────────────────────
     //  DASHBOARD
-    //
-    // ============================================
-    let currentPeriod = 'month';
+    // ──────────────────────────────────────────────
 
     function renderDashboard() {
       const today = new Date().toLocaleDateString('it-IT', {
@@ -408,7 +379,6 @@
     }
 
     async function loadDashboardData() {
-      // ═══ FIX: salva versione all'avvio ═══
       const myVersion = pageVersion;
       await Promise.all([
         loadCounters(myVersion),
@@ -421,8 +391,7 @@
       const { from, to } = getDateRange();
       try {
         const leadsSnap = await getDocs(collection(db, 'leads'));
-        if (pageVersion !== myVersion) return; // ═══ FIX: pagina cambiata, esci ═══
-
+        if (pageVersion !== myVersion) return;
         let totalLeads = 0, newLeads = 0, contratti = 0, iscritti = 0;
         leadsSnap.forEach(docSnap => {
           const d = docSnap.data();
@@ -434,19 +403,16 @@
             if (d.stato === 'Iscritto') iscritti++;
           }
         });
-
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         const appSnap = await getDocs(collection(db, 'appuntamenti'));
-        if (pageVersion !== myVersion) return; // ═══ FIX ═══
-
+        if (pageVersion !== myVersion) return;
         let appOggi = 0;
         appSnap.forEach(docSnap => {
           const d = docSnap.data();
           const dt = d.data?.toDate ? d.data.toDate() : null;
           if (dt && dt >= todayStart && dt <= todayEnd) appOggi++;
         });
-
         setCounter('counterTotal', totalLeads);
         setCounter('counterAppointments', appOggi);
         setCounter('counterContracts', contratti);
@@ -471,15 +437,13 @@
       try {
         const q2 = query(collection(db, 'leads'), orderBy('dataCreazione', 'desc'), limit(10));
         const snap = await getDocs(q2);
-        if (pageVersion !== myVersion) return; // ═══ FIX ═══
-
+        if (pageVersion !== myVersion) return;
         if (snap.empty) {
           container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p>Nessun lead ancora</p></div>`;
           return;
         }
         const statiMap = await loadStatiColors();
-        if (pageVersion !== myVersion) return; // ═══ FIX ═══
-
+        if (pageVersion !== myVersion) return;
         let html = '';
         snap.forEach(docSnap => {
           const d = docSnap.data();
@@ -506,8 +470,7 @@
       if (!container) return;
       try {
         const snap = await getDocs(collection(db, 'appuntamenti'));
-        if (pageVersion !== myVersion) return; // ═══ FIX ═══
-
+        if (pageVersion !== myVersion) return;
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         const todayArr = [];
@@ -550,21 +513,9 @@
       return map;
     }
 
-    // ============================================
-    //
+    // ──────────────────────────────────────────────
     //  MODULO LEAD
-    //
-    // ============================================
-
-    let allLeads = [];
-    let allStati = [];
-    let allFonti = [];
-    let leadCurrentView = 'kanban';
-    let selectedLeads = new Set();
-    let leadImportData = [];
-    let leadSortField = 'dataCreazione';
-    let leadSortDir = 'desc';
-    let deleteCallback = null;
+    // ──────────────────────────────────────────────
 
     async function loadLeadStati() {
       try {
@@ -587,11 +538,11 @@
     }
 
     async function renderLeadPage() {
-      const myVersion = pageVersion; // ═══ FIX ═══
+      const myVersion = pageVersion;
       mainContent.innerHTML = `<div style="display:flex;justify-content:center;padding:60px;"><div class="spinner"></div></div>`;
       await loadLeadStati();
       await loadLeadFonti();
-      if (pageVersion !== myVersion) return; // ═══ FIX: utente ha già cambiato pagina ═══
+      if (pageVersion !== myVersion) return;
 
       const fontiOptions = allFonti.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
       const statiOptions = allStati.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
@@ -679,9 +630,8 @@
         </div>
       `;
 
-      if (pageVersion !== myVersion) return; // ═══ FIX ═══
+      if (pageVersion !== myVersion) return;
 
-      // Bind eventi
       document.getElementById('btnNewLead').addEventListener('click', openNewLead);
       document.getElementById('btnImportExcel').addEventListener('click', () => openModal('importModal'));
       document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplate);
@@ -713,11 +663,9 @@
         });
       });
 
-      // Listener real-time
       leadUnsubscribe = onSnapshot(
         query(collection(db, 'leads'), orderBy('dataCreazione', 'desc')),
         (snap) => {
-          // ═══ FIX: controlla che siamo ancora sulla pagina lead ═══
           if (currentPage !== 'lead') return;
           allLeads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderLeadView();
@@ -725,7 +673,6 @@
       );
     }
 
-    // --- FILTRI LEAD ---
     function getFilteredLeads() {
       let leads = [...allLeads];
       const periodo = document.getElementById('leadFilterPeriodo')?.value || 'tutti';
@@ -764,7 +711,7 @@
     }
 
     function renderLeadView() {
-      if (currentPage !== 'lead') return; // ═══ FIX ═══
+      if (currentPage !== 'lead') return;
       if (leadCurrentView === 'kanban') renderLeadKanban();
       else renderLeadList();
       updateBulkBar();
@@ -900,41 +847,12 @@
       const oldStato = lead.stato;
       await updateDoc(doc(db, 'leads', leadId), { stato: newStato });
       await addDoc(collection(db, 'leads', leadId, 'storicoStati'), {
-        statoPrecedente: oldStato,
-        statoNuovo: newStato,
-        data: serverTimestamp(),
-        origine: 'Cambio manuale'
+        statoPrecedente: oldStato, statoNuovo: newStato,
+        data: serverTimestamp(), origine: 'Cambio manuale'
       });
       showToast(`Stato: ${oldStato} → ${newStato}`, 'success');
     }
 
-    const leadOverlay = document.getElementById('leadOverlay');
-    const leadPanel = document.getElementById('leadPanel');
-    const leadPanelClose = document.getElementById('leadPanelClose');
-
-    leadOverlay.addEventListener('click', closeLeadPanel);
-    leadPanelClose.addEventListener('click', closeLeadPanel);
-
-    function openLeadPanel() {
-      document.getElementById('leadOverlay').classList.add('open');
-      document.getElementById('leadPanel').classList.add('open');
-    }
-
-    function closeLeadPanel() {
-      document.getElementById('leadOverlay')?.classList.remove('open');
-      document.getElementById('leadPanel')?.classList.remove('open');
-      currentLeadId = null;
-    }
-
-    function openNewLead() {
-      window.location.href = 'lead-detail.html?id=new';
-    }
-
-    function openLeadDetail(id) {
-      window.location.href = 'lead-detail.html?id=' + id;
-    }
-
-    // --- SAVE LEAD ---
     async function saveLead() {
       const nome = document.getElementById('fNome')?.value.trim();
       const cognome = document.getElementById('fCognome')?.value.trim();
@@ -981,7 +899,6 @@
       }
     }
 
-    // --- DELETE SELECTED ---
     function deleteSelectedLeads() {
       const count = selectedLeads.size;
       if (count === 0) return;
@@ -996,34 +913,6 @@
       };
       openModal('deleteModal');
     }
-
-    document.getElementById('deleteCancelBtn').addEventListener('click', () => closeModal('deleteModal'));
-    document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
-      if (deleteCallback) await deleteCallback();
-      deleteCallback = null;
-      closeModal('deleteModal');
-    });
-
-    // --- IMPORT EXCEL ---
-    const dropzone = document.getElementById('dropzone');
-    const importFileInput = document.getElementById('importFileInput');
-
-    dropzone.addEventListener('click', () => importFileInput.click());
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-    dropzone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropzone.classList.remove('dragover');
-      if (e.dataTransfer.files[0]) parseExcel(e.dataTransfer.files[0]);
-    });
-    importFileInput.addEventListener('change', () => {
-      if (importFileInput.files[0]) parseExcel(importFileInput.files[0]);
-    });
-    document.getElementById('importCancelBtn').addEventListener('click', () => {
-      closeModal('importModal');
-      resetImport();
-    });
-    document.getElementById('importConfirmBtn').addEventListener('click', confirmImport);
 
     function parseExcel(file) {
       document.getElementById('importFileName').textContent = file.name;
@@ -1105,10 +994,66 @@
       XLSX.writeFile(wb, 'Template_Import_Lead.xlsx');
     }
 
-    // ============================================
-    // INIT — Eseguito dopo tutte le dichiarazioni
-    // ============================================
+    // ╔══════════════════════════════════════════════╗
+    // ║  SEZIONE 3 — EVENT LISTENERS                  ║
+    // ╚══════════════════════════════════════════════╝
+
+    loginBtn.addEventListener('click', doLogin);
+    loginPasswordEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    loginIdEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        showPage(item.dataset.page);
+        sidebarEl.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+      });
+    });
+
+    hamburgerBtn.addEventListener('click', () => {
+      sidebarEl.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebarEl.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    leadOverlay.addEventListener('click', closeLeadPanel);
+    leadPanelClose.addEventListener('click', closeLeadPanel);
+
+    document.getElementById('deleteCancelBtn').addEventListener('click', () => closeModal('deleteModal'));
+    document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+      if (deleteCallback) await deleteCallback();
+      deleteCallback = null;
+      closeModal('deleteModal');
+    });
+
+    dropzone.addEventListener('click', () => importFileInput.click());
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) parseExcel(e.dataTransfer.files[0]);
+    });
+    importFileInput.addEventListener('change', () => {
+      if (importFileInput.files[0]) parseExcel(importFileInput.files[0]);
+    });
+    document.getElementById('importCancelBtn').addEventListener('click', () => {
+      closeModal('importModal');
+      resetImport();
+    });
+    document.getElementById('importConfirmBtn').addEventListener('click', confirmImport);
+
+    // ╔══════════════════════════════════════════════╗
+    // ║  SEZIONE 4 — INIT                             ║
+    // ╚══════════════════════════════════════════════╝
     if (sessionStorage.getItem('silvia_logged') === 'true') {
+      loginPage.style.display = 'none';
+      appPage.style.display = 'flex';
       showPage('dashboard');
     }
   </script>
