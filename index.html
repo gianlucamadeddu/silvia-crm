@@ -78,7 +78,7 @@
     <main class="main-content" id="mainContent"></main>
   </div>
 
-  <!-- ============ LEAD DETAIL PANEL (fuori dal mainContent perché è overlay) ============ -->
+  <!-- ============ LEAD DETAIL PANEL ============ -->
   <div class="lead-overlay" id="leadOverlay"></div>
   <div class="lead-panel" id="leadPanel">
     <div class="lead-panel-header">
@@ -143,6 +143,15 @@
     } from './js/firebase-config.js';
 
     // ============================================
+    // PAGE VERSION — previene race condition
+    // Ogni volta che cambi pagina, pageVersion aumenta.
+    // Le funzioni async controllano se la versione è
+    // ancora quella corrente prima di toccare il DOM.
+    // ============================================
+    let pageVersion = 0;
+    let currentPage = null;
+
+    // ============================================
     // AUTENTICAZIONE
     // ============================================
     const CREDENTIALS = { id: "Silvia", password: "iosonosilvia@2026" };
@@ -204,15 +213,25 @@
       });
     });
 
-    // Stacca il listener real-time quando si esce dalla pagina Lead
+    // Listener real-time Lead
     let leadUnsubscribe = null;
 
     function showPage(page) {
-      // Stacca listener lead se si esce da quella pagina
+      // ═══ FIX 1: Incrementa versione pagina ═══
+      pageVersion++;
+      currentPage = page;
+
+      // ═══ FIX 2: Chiudi panel/modal aperti ═══
+      closeLeadPanel();
+      closeModal('importModal');
+      closeModal('deleteModal');
+
+      // ═══ FIX 3: Stacca listener lead se si esce ═══
       if (leadUnsubscribe && page !== 'lead') {
         leadUnsubscribe();
         leadUnsubscribe = null;
       }
+
       if (page === 'dashboard') {
         renderDashboard();
       } else if (page === 'lead') {
@@ -255,13 +274,15 @@
     }
 
     // ============================================
-    //  MODALS
+    // MODALS
     // ============================================
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
     // ============================================
-    // DASHBOARD (invariata)
+    //
+    //  DASHBOARD
+    //
     // ============================================
     let currentPeriod = 'month';
 
@@ -383,13 +404,21 @@
     }
 
     async function loadDashboardData() {
-      await Promise.all([loadCounters(), loadRecentClients(), loadTodayAppointments()]);
+      // ═══ FIX: salva versione all'avvio ═══
+      const myVersion = pageVersion;
+      await Promise.all([
+        loadCounters(myVersion),
+        loadRecentClients(myVersion),
+        loadTodayAppointments(myVersion)
+      ]);
     }
 
-    async function loadCounters() {
+    async function loadCounters(myVersion) {
       const { from, to } = getDateRange();
       try {
         const leadsSnap = await getDocs(collection(db, 'leads'));
+        if (pageVersion !== myVersion) return; // ═══ FIX: pagina cambiata, esci ═══
+
         let totalLeads = 0, newLeads = 0, contratti = 0, iscritti = 0;
         leadsSnap.forEach(docSnap => {
           const d = docSnap.data();
@@ -401,15 +430,19 @@
             if (d.stato === 'Iscritto') iscritti++;
           }
         });
+
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         const appSnap = await getDocs(collection(db, 'appuntamenti'));
+        if (pageVersion !== myVersion) return; // ═══ FIX ═══
+
         let appOggi = 0;
         appSnap.forEach(docSnap => {
           const d = docSnap.data();
           const dt = d.data?.toDate ? d.data.toDate() : null;
           if (dt && dt >= todayStart && dt <= todayEnd) appOggi++;
         });
+
         setCounter('counterTotal', totalLeads);
         setCounter('counterAppointments', appOggi);
         setCounter('counterContracts', contratti);
@@ -417,6 +450,7 @@
         setCounter('counterNew', newLeads);
       } catch (err) {
         console.error('Errore contatori:', err);
+        if (pageVersion !== myVersion) return;
         ['counterTotal', 'counterAppointments', 'counterContracts', 'counterEnrolled', 'counterNew']
           .forEach(id => setCounter(id, '–'));
       }
@@ -427,17 +461,21 @@
       if (el) el.textContent = value;
     }
 
-    async function loadRecentClients() {
+    async function loadRecentClients(myVersion) {
       const container = document.getElementById('recentClients');
       if (!container) return;
       try {
         const q2 = query(collection(db, 'leads'), orderBy('dataCreazione', 'desc'), limit(10));
         const snap = await getDocs(q2);
+        if (pageVersion !== myVersion) return; // ═══ FIX ═══
+
         if (snap.empty) {
           container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p>Nessun lead ancora</p></div>`;
           return;
         }
         const statiMap = await loadStatiColors();
+        if (pageVersion !== myVersion) return; // ═══ FIX ═══
+
         let html = '';
         snap.forEach(docSnap => {
           const d = docSnap.data();
@@ -449,23 +487,23 @@
           html += `<div class="section-row" data-id="${docSnap.id}"><div class="section-row-left"><div class="section-row-name">${nome}</div><div class="section-row-detail">${fonte} · ${data}</div></div><div class="section-row-right"><span class="badge" style="background:${colore}18;color:${colore}">${stato}</span></div></div>`;
         });
         container.innerHTML = html;
-        // Click per aprire il lead dalla dashboard
         container.querySelectorAll('.section-row').forEach(row => {
-          row.addEventListener('click', () => {
-            openLeadDetail(row.dataset.id);
-          });
+          row.addEventListener('click', () => openLeadDetail(row.dataset.id));
         });
       } catch (err) {
         console.error('Errore lead recenti:', err);
-        container.innerHTML = '<div class="empty-state"><p>Errore nel caricamento</p></div>';
+        if (pageVersion !== myVersion) return;
+        if (container) container.innerHTML = '<div class="empty-state"><p>Errore nel caricamento</p></div>';
       }
     }
 
-    async function loadTodayAppointments() {
+    async function loadTodayAppointments(myVersion) {
       const container = document.getElementById('todayAppointments');
       if (!container) return;
       try {
         const snap = await getDocs(collection(db, 'appuntamenti'));
+        if (pageVersion !== myVersion) return; // ═══ FIX ═══
+
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         const todayArr = [];
@@ -491,7 +529,8 @@
         container.innerHTML = html;
       } catch (err) {
         console.error('Errore appuntamenti:', err);
-        container.innerHTML = '<div class="empty-state"><p>Errore nel caricamento</p></div>';
+        if (pageVersion !== myVersion) return;
+        if (container) container.innerHTML = '<div class="empty-state"><p>Errore nel caricamento</p></div>';
       }
     }
 
@@ -508,11 +547,9 @@
     }
 
     // ============================================
-    // ============================================
     //
-    //  MODULO LEAD — PIPELINE E GESTIONE
+    //  MODULO LEAD
     //
-    // ============================================
     // ============================================
 
     let allLeads = [];
@@ -526,7 +563,6 @@
     let leadSortDir = 'desc';
     let deleteCallback = null;
 
-    // --- LOAD STATI & FONTI ---
     async function loadLeadStati() {
       try {
         const snap = await getDocs(query(collection(db, 'impostazioni', 'stati', 'items'), orderBy('posizione')));
@@ -547,13 +583,13 @@
       }
     }
 
-    // --- RENDER PAGINA LEAD ---
     async function renderLeadPage() {
+      const myVersion = pageVersion; // ═══ FIX ═══
       mainContent.innerHTML = `<div style="display:flex;justify-content:center;padding:60px;"><div class="spinner"></div></div>`;
       await loadLeadStati();
       await loadLeadFonti();
+      if (pageVersion !== myVersion) return; // ═══ FIX: utente ha già cambiato pagina ═══
 
-      // Fonti options
       const fontiOptions = allFonti.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
       const statiOptions = allStati.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
 
@@ -578,8 +614,6 @@
             </button>
           </div>
         </div>
-
-        <!-- FILTRI -->
         <div class="filter-bar" style="margin-bottom:16px;">
           <select id="leadFilterPeriodo">
             <option value="mese">Mese corrente</option>
@@ -615,8 +649,6 @@
             </button>
           </div>
         </div>
-
-        <!-- BULK BAR -->
         <div class="lead-bulk-bar" id="leadBulkBar">
           <span id="leadBulkCount">0 selezionati</span>
           <button class="btn btn-red" style="padding:6px 14px;font-size:12px;" id="btnDeleteSelected">
@@ -624,11 +656,7 @@
             Elimina selezionati
           </button>
         </div>
-
-        <!-- KANBAN -->
         <div class="lead-kanban" id="leadKanban"></div>
-
-        <!-- ELENCO -->
         <div class="lead-list" id="leadList" style="display:none;">
           <table class="lead-table">
             <thead>
@@ -648,12 +676,13 @@
         </div>
       `;
 
+      if (pageVersion !== myVersion) return; // ═══ FIX ═══
+
       // Bind eventi
       document.getElementById('btnNewLead').addEventListener('click', openNewLead);
       document.getElementById('btnImportExcel').addEventListener('click', () => openModal('importModal'));
       document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplate);
       document.getElementById('btnDeleteSelected').addEventListener('click', deleteSelectedLeads);
-
       document.getElementById('leadFilterPeriodo').addEventListener('change', function () {
         document.getElementById('leadDateRange').classList.toggle('visible', this.value === 'personalizzato');
         renderLeadView();
@@ -663,10 +692,8 @@
       document.getElementById('leadSearchInput').addEventListener('input', renderLeadView);
       document.getElementById('leadFilterDa').addEventListener('change', renderLeadView);
       document.getElementById('leadFilterA').addEventListener('change', renderLeadView);
-
       document.getElementById('btnViewKanban').addEventListener('click', () => setLeadView('kanban'));
       document.getElementById('btnViewElenco').addEventListener('click', () => setLeadView('elenco'));
-
       document.getElementById('leadSelectAll').addEventListener('change', function () {
         const leads = getFilteredLeads();
         if (this.checked) leads.forEach(l => selectedLeads.add(l.id));
@@ -674,8 +701,6 @@
         updateBulkBar();
         renderLeadView();
       });
-
-      // Table header sort
       document.querySelectorAll('.lead-table th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
           const field = th.dataset.sort;
@@ -685,10 +710,12 @@
         });
       });
 
-      // Ascolta i lead in tempo reale
+      // Listener real-time
       leadUnsubscribe = onSnapshot(
         query(collection(db, 'leads'), orderBy('dataCreazione', 'desc')),
         (snap) => {
+          // ═══ FIX: controlla che siamo ancora sulla pagina lead ═══
+          if (currentPage !== 'lead') return;
           allLeads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderLeadView();
         }
@@ -701,7 +728,6 @@
       const periodo = document.getElementById('leadFilterPeriodo')?.value || 'tutti';
       const now = new Date();
       let startDate = null, endDate = null;
-
       if (periodo === 'mese') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       else if (periodo === 'trimestre') startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
       else if (periodo === 'semestre') startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
@@ -712,7 +738,6 @@
         if (da) startDate = new Date(da);
         if (a) { endDate = new Date(a); endDate.setHours(23, 59, 59); }
       }
-
       if (startDate) leads = leads.filter(l => {
         const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
         return d >= startDate;
@@ -721,13 +746,10 @@
         const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
         return d <= endDate;
       });
-
       const fonte = document.getElementById('leadFilterFonte')?.value;
       if (fonte) leads = leads.filter(l => l.fonte === fonte);
-
       const stato = document.getElementById('leadFilterStato')?.value;
       if (stato) leads = leads.filter(l => l.stato === stato);
-
       const q = (document.getElementById('leadSearchInput')?.value || '').toLowerCase().trim();
       if (q) leads = leads.filter(l =>
         (l.nome || '').toLowerCase().includes(q) ||
@@ -739,6 +761,7 @@
     }
 
     function renderLeadView() {
+      if (currentPage !== 'lead') return; // ═══ FIX ═══
       if (leadCurrentView === 'kanban') renderLeadKanban();
       else renderLeadList();
       updateBulkBar();
@@ -746,32 +769,29 @@
 
     function setLeadView(view) {
       leadCurrentView = view;
-      document.getElementById('btnViewKanban').classList.toggle('active', view === 'kanban');
-      document.getElementById('btnViewElenco').classList.toggle('active', view === 'elenco');
-      document.getElementById('leadKanban').style.display = view === 'kanban' ? 'flex' : 'none';
-      document.getElementById('leadList').style.display = view === 'elenco' ? 'block' : 'none';
+      document.getElementById('btnViewKanban')?.classList.toggle('active', view === 'kanban');
+      document.getElementById('btnViewElenco')?.classList.toggle('active', view === 'elenco');
+      const kanbanEl = document.getElementById('leadKanban');
+      const listEl = document.getElementById('leadList');
+      if (kanbanEl) kanbanEl.style.display = view === 'kanban' ? 'flex' : 'none';
+      if (listEl) listEl.style.display = view === 'elenco' ? 'block' : 'none';
       renderLeadView();
     }
 
-    // --- KANBAN ---
     function renderLeadKanban() {
       const container = document.getElementById('leadKanban');
       if (!container) return;
       const leads = getFilteredLeads();
       container.innerHTML = '';
-
       allStati.forEach(stato => {
         const colLeads = leads.filter(l => l.stato === stato.nome);
         const col = document.createElement('div');
         col.className = 'kanban-col';
-
         const headerBg = stato.colore + '20';
         col.innerHTML = `<div class="kanban-col-header" style="background:${headerBg}"><span class="kanban-col-title" style="color:${stato.colore}">${stato.nome}</span><span class="kanban-col-count" style="color:${stato.colore}">${colLeads.length}</span></div>`;
-
         const body = document.createElement('div');
         body.className = 'kanban-col-body';
         body.dataset.stato = stato.nome;
-
         body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('drag-over'); });
         body.addEventListener('dragleave', () => body.classList.remove('drag-over'));
         body.addEventListener('drop', e => {
@@ -780,18 +800,15 @@
           const leadId = e.dataTransfer.getData('text/plain');
           moveLeadToStato(leadId, body.dataset.stato);
         });
-
         colLeads.forEach(lead => {
           const card = document.createElement('div');
           card.className = 'kanban-card';
           card.draggable = true;
           card.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', lead.id); card.classList.add('dragging'); });
           card.addEventListener('dragend', () => card.classList.remove('dragging'));
-
           const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
           const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
           const checked = selectedLeads.has(lead.id) ? 'checked' : '';
-
           card.innerHTML = `
             <input type="checkbox" class="kanban-card-check" ${checked}>
             <div class="kanban-card-name">${lead.nome} ${lead.cognome}</div>
@@ -801,27 +818,22 @@
               <span class="kanban-card-date">${dateStr}</span>
             </div>
           `;
-
           card.querySelector('.kanban-card-check').addEventListener('click', (e) => {
             e.stopPropagation();
             toggleLeadSelect(lead.id);
           });
           card.querySelector('.kanban-card-name').addEventListener('click', () => openLeadDetail(lead.id));
-
           body.appendChild(card);
         });
-
         col.appendChild(body);
         container.appendChild(col);
       });
     }
 
-    // --- ELENCO ---
     function renderLeadList() {
       const tbody = document.getElementById('leadListBody');
       if (!tbody) return;
       let leads = getFilteredLeads();
-
       leads.sort((a, b) => {
         let va = a[leadSortField] || '';
         let vb = b[leadSortField] || '';
@@ -835,7 +847,6 @@
         if (va > vb) return leadSortDir === 'asc' ? 1 : -1;
         return 0;
       });
-
       tbody.innerHTML = '';
       leads.forEach(lead => {
         const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
@@ -844,7 +855,6 @@
         const badgeBg = stato ? stato.colore + '20' : '#f1f5f9';
         const badgeColor = stato ? stato.colore : '#64748b';
         const checked = selectedLeads.has(lead.id) ? 'checked' : '';
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;"><input type="checkbox" ${checked} data-id="${lead.id}"></td>
@@ -865,22 +875,22 @@
       });
     }
 
-    // --- SELEZIONE ---
     function toggleLeadSelect(id) {
       if (selectedLeads.has(id)) selectedLeads.delete(id);
       else selectedLeads.add(id);
       updateBulkBar();
+      renderLeadView();
     }
 
     function updateBulkBar() {
       const bar = document.getElementById('leadBulkBar');
       if (!bar) return;
       const count = selectedLeads.size;
-      document.getElementById('leadBulkCount').textContent = `${count} selezionat${count === 1 ? 'o' : 'i'}`;
+      const countEl = document.getElementById('leadBulkCount');
+      if (countEl) countEl.textContent = `${count} selezionat${count === 1 ? 'o' : 'i'}`;
       bar.classList.toggle('visible', count > 0);
     }
 
-    // --- DRAG & DROP ---
     async function moveLeadToStato(leadId, newStato) {
       const lead = allLeads.find(l => l.id === leadId);
       if (!lead || lead.stato === newStato) return;
@@ -895,7 +905,7 @@
       showToast(`Stato: ${oldStato} → ${newStato}`, 'success');
     }
 
-    // --- LEAD DETAIL PANEL ---
+    // --- LEAD PANEL ---
     const leadOverlay = document.getElementById('leadOverlay');
     const leadPanel = document.getElementById('leadPanel');
     const leadPanelClose = document.getElementById('leadPanelClose');
@@ -914,63 +924,32 @@
       currentLeadId = null;
     }
 
-    // ══════════════════════════════════════════════
-    // MODIFICA 1: openNewLead → redirect a lead-detail.html
-    // ══════════════════════════════════════════════
     function openNewLead() {
       window.location.href = 'lead-detail.html?id=new';
     }
 
-    // ══════════════════════════════════════════════
-    // MODIFICA 2: openLeadDetail → redirect a lead-detail.html
-    // ══════════════════════════════════════════════
-    async function openLeadDetail(id) {
+    function openLeadDetail(id) {
       window.location.href = 'lead-detail.html?id=' + id;
-    }
-
-    async function loadStorico(leadId) {
-      const timeline = document.getElementById('storicoTimeline');
-      if (!timeline) return;
-      try {
-        const snap = await getDocs(query(collection(db, 'leads', leadId, 'storicoStati'), orderBy('data', 'desc')));
-        if (snap.empty) {
-          timeline.innerHTML = '<p style="font-size:12px;color:var(--text-secondary);">Nessun cambio di stato registrato.</p>';
-          return;
-        }
-        let html = '';
-        snap.docs.forEach(d => {
-          const s = d.data();
-          const date = s.data?.toDate ? s.data.toDate() : new Date();
-          const statoObj = allStati.find(st => st.nome === s.statoNuovo);
-          const color = statoObj ? statoObj.colore : '#94a3b8';
-          html += `<div class="timeline-item" style="border-left-color:${color}"><div class="ti-content"><div class="ti-value">${s.statoPrecedente || '—'} → ${s.statoNuovo}</div><div class="ti-label">${s.origine || ''}</div></div><div class="ti-date">${date.toLocaleDateString('it-IT')} ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</div></div>`;
-        });
-        timeline.innerHTML = html;
-      } catch (e) {
-        timeline.innerHTML = '<p style="font-size:12px;color:var(--text-secondary);">Errore caricamento storico.</p>';
-      }
     }
 
     // --- SAVE LEAD ---
     async function saveLead() {
-      const nome = document.getElementById('fNome').value.trim();
-      const cognome = document.getElementById('fCognome').value.trim();
-      const telefono = document.getElementById('fTelefono').value.trim();
+      const nome = document.getElementById('fNome')?.value.trim();
+      const cognome = document.getElementById('fCognome')?.value.trim();
+      const telefono = document.getElementById('fTelefono')?.value.trim();
       if (!nome || !cognome || !telefono) {
         showToast('Nome, Cognome e Telefono sono obbligatori', 'error');
         return;
       }
-
       const data = {
         nome, cognome, telefono,
-        email: document.getElementById('fEmail').value.trim(),
-        fonte: document.getElementById('fFonte').value,
-        priorita: document.getElementById('fPriorita').value,
-        provincia: document.getElementById('fProvincia').value.trim(),
-        isMinore: document.getElementById('fIsMinore').value === 'true',
-        note: document.getElementById('fNote').value.trim(),
+        email: document.getElementById('fEmail')?.value.trim() || '',
+        fonte: document.getElementById('fFonte')?.value || '',
+        priorita: document.getElementById('fPriorita')?.value || '',
+        provincia: document.getElementById('fProvincia')?.value.trim() || '',
+        isMinore: document.getElementById('fIsMinore')?.value === 'true',
+        note: document.getElementById('fNote')?.value.trim() || '',
       };
-
       if (data.isMinore) {
         data.genitore = {
           nome: document.getElementById('fGenNome')?.value.trim() || '',
@@ -979,7 +958,6 @@
           email: document.getElementById('fGenEmail')?.value.trim() || '',
         };
       }
-
       try {
         if (currentLeadId) {
           await updateDoc(doc(db, 'leads', currentLeadId), data);
@@ -1017,7 +995,6 @@
       openModal('deleteModal');
     }
 
-    // --- DELETE MODAL ---
     document.getElementById('deleteCancelBtn').addEventListener('click', () => closeModal('deleteModal'));
     document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
       if (deleteCallback) await deleteCallback();
@@ -1040,7 +1017,6 @@
     importFileInput.addEventListener('change', () => {
       if (importFileInput.files[0]) parseExcel(importFileInput.files[0]);
     });
-
     document.getElementById('importCancelBtn').addEventListener('click', () => {
       closeModal('importModal');
       resetImport();
@@ -1059,7 +1035,6 @@
           let errors = 0;
           const previewBody = document.getElementById('previewBody');
           previewBody.innerHTML = '';
-
           json.forEach((row, i) => {
             const nome = (row['Nome'] || row['nome'] || '').toString().trim();
             const cognome = (row['Cognome'] || row['cognome'] || '').toString().trim();
@@ -1070,13 +1045,11 @@
             const valid = nome && cognome && telefono;
             if (!valid) errors++;
             leadImportData.push({ nome, cognome, telefono, email, fonte, note, valid });
-
             const tr = document.createElement('tr');
             if (!valid) tr.className = 'error-row';
             tr.innerHTML = `<td>${i + 1}</td><td>${nome || '<em style="color:var(--red)">mancante</em>'}</td><td>${cognome || '<em style="color:var(--red)">mancante</em>'}</td><td>${telefono || '<em style="color:var(--red)">mancante</em>'}</td><td>${email}</td><td>${fonte}</td><td>${note}</td><td>${valid ? '✓' : '<span style="color:var(--red)">✗</span>'}</td>`;
             previewBody.appendChild(tr);
           });
-
           document.getElementById('importErrors').textContent = errors > 0 ? `${errors} righe con errori (verranno saltate)` : '';
           document.getElementById('importStep1').style.display = 'none';
           document.getElementById('importStep2').style.display = 'block';
@@ -1121,7 +1094,6 @@
       importFileInput.value = '';
     }
 
-    // --- DOWNLOAD TEMPLATE ---
     function downloadTemplate() {
       const data = [{ Nome: 'Mario', Cognome: 'Rossi', Telefono: '3331234567', Email: 'mario@email.com', Fonte: 'Sito Web', Note: 'Interessato al corso AFM' }];
       const ws = XLSX.utils.json_to_sheet(data);
