@@ -170,7 +170,7 @@
     if (sessionStorage.getItem('silvia_logged') === 'true') {
       loginPage.style.display = 'none';
       appPage.style.display = 'flex';
-      showPage('dashboard');
+      // showPage viene chiamato in fondo, dopo tutte le dichiarazioni
     }
 
     loginBtn.addEventListener('click', doLogin);
@@ -1103,6 +1103,13 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Template Lead');
       XLSX.writeFile(wb, 'Template_Import_Lead.xlsx');
+    }
+
+    // ============================================
+    // INIT — Eseguito dopo tutte le dichiarazioni
+    // ============================================
+    if (sessionStorage.getItem('silvia_logged') === 'true') {
+      showPage('dashboard');
     }
   </script>
 </body>
