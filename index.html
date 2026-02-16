@@ -7,34 +7,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- SheetJS per import/export Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-
   <!-- ============ LOGIN ============ -->
   <div id="loginPage" class="login-container">
     <div class="login-card">
       <div class="login-logo">SILVIA</div>
       <div class="login-payoff">Vendita</div>
-
       <div class="form-group">
         <label for="loginId">ID</label>
         <input type="text" id="loginId" placeholder="Inserisci il tuo ID" autocomplete="off">
       </div>
-
       <div class="form-group">
         <label for="loginPassword">Password</label>
         <input type="password" id="loginPassword" placeholder="Inserisci la password">
       </div>
-
       <div id="loginError" class="login-error">ID o Password non corretti.</div>
-
       <button class="btn btn-primary" id="loginBtn">Accedi</button>
     </div>
   </div>
 
   <!-- ============ APP ============ -->
   <div id="appPage" class="app-container" style="display:none;">
-
     <!-- Mobile Header -->
     <div class="mobile-header">
       <button class="hamburger" id="hamburgerBtn">
@@ -42,43 +38,35 @@
       </button>
       <div class="sidebar-logo">SILVIA</div>
     </div>
-
     <!-- Overlay mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">SILVIA</div>
         <div class="sidebar-payoff">Vendita</div>
       </div>
-
       <nav class="sidebar-nav">
         <button class="nav-item active" data-page="dashboard">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           Dashboard
         </button>
-
         <button class="nav-item" data-page="lead">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Lead
         </button>
-
         <button class="nav-item" data-page="agenda">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Agenda Calendario
         </button>
-
         <button class="nav-item" data-page="template">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Template
         </button>
-
         <button class="nav-item" data-page="impostazioni">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Impostazioni
         </button>
-
         <button class="nav-item" data-page="report">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Report
@@ -87,27 +75,83 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-      <!-- Il contenuto viene caricato dinamicamente -->
-    </main>
+    <main class="main-content" id="mainContent"></main>
   </div>
 
+  <!-- ============ LEAD DETAIL PANEL (fuori dal mainContent perché è overlay) ============ -->
+  <div class="lead-overlay" id="leadOverlay"></div>
+  <div class="lead-panel" id="leadPanel">
+    <div class="lead-panel-header">
+      <h2 id="leadPanelTitle">Nuovo Lead</h2>
+      <button class="lead-panel-close" id="leadPanelClose">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="lead-panel-body" id="leadPanelBody"></div>
+  </div>
+
+  <!-- ============ MODAL: IMPORT EXCEL ============ -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal modal-lg">
+      <h2>Importa Lead da Excel</h2>
+      <div id="importStep1">
+        <div class="dropzone" id="dropzone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Trascina il file .xlsx qui o clicca per selezionarlo</p>
+          <p class="dropzone-hint">Formato accettato: .xlsx — Usa il template scaricabile</p>
+        </div>
+        <input type="file" id="importFileInput" accept=".xlsx" style="display:none">
+      </div>
+      <div id="importStep2" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:14px;font-weight:600;" id="importFileName"></span>
+          <span class="lead-error-msg" id="importErrors"></span>
+        </div>
+        <div style="max-height:350px;overflow:auto;">
+          <table class="preview-table" id="previewTable">
+            <thead><tr><th>#</th><th>Nome</th><th>Cognome</th><th>Telefono</th><th>Email</th><th>Fonte</th><th>Note</th><th>Stato</th></tr></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="importCancelBtn">Annulla</button>
+        <button class="btn btn-primary" id="importConfirmBtn" style="display:none;width:auto;">Importa Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: CONFERMA ELIMINAZIONE ============ -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h2>Conferma eliminazione</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:6px;" id="deleteMessage">Sei sicuro? Questa azione è irreversibile.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="deleteCancelBtn">Annulla</button>
+        <button class="btn btn-red" id="deleteConfirmBtn">Elimina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div class="toast" id="toast"></div>
+
   <script type="module">
-    import { 
-      db, collection, getDocs, query, orderBy, limit, Timestamp 
+    import {
+      db, collection, doc, setDoc, getDocs, addDoc, updateDoc, deleteDoc,
+      query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp
     } from './js/firebase-config.js';
 
     // ============================================
     // AUTENTICAZIONE
     // ============================================
     const CREDENTIALS = { id: "Silvia", password: "iosonosilvia@2026" };
-
     const loginPage = document.getElementById('loginPage');
     const appPage = document.getElementById('appPage');
     const loginBtn = document.getElementById('loginBtn');
     const loginError = document.getElementById('loginError');
-    const loginId = document.getElementById('loginId');
-    const loginPassword = document.getElementById('loginPassword');
+    const loginIdEl = document.getElementById('loginId');
+    const loginPasswordEl = document.getElementById('loginPassword');
 
     if (sessionStorage.getItem('silvia_logged') === 'true') {
       loginPage.style.display = 'none';
@@ -116,12 +160,12 @@
     }
 
     loginBtn.addEventListener('click', doLogin);
-    loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
-    loginId.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    loginPasswordEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    loginIdEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
 
     function doLogin() {
-      const id = loginId.value.trim();
-      const pw = loginPassword.value;
+      const id = loginIdEl.value.trim();
+      const pw = loginPasswordEl.value;
       if (id === CREDENTIALS.id && pw === CREDENTIALS.password) {
         sessionStorage.setItem('silvia_logged', 'true');
         loginPage.style.display = 'none';
@@ -130,8 +174,8 @@
         showPage('dashboard');
       } else {
         loginError.style.display = 'block';
-        loginPassword.value = '';
-        loginPassword.focus();
+        loginPasswordEl.value = '';
+        loginPasswordEl.focus();
       }
     }
 
@@ -140,9 +184,10 @@
     // ============================================
     const navItems = document.querySelectorAll('.nav-item');
     const mainContent = document.getElementById('mainContent');
+    const sidebarEl = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     const placeholderPages = {
-      lead: { title: 'Lead', subtitle: 'Gestione contatti e pipeline' },
       agenda: { title: 'Agenda Calendario', subtitle: 'Appuntamenti e richiami' },
       template: { title: 'Template', subtitle: 'Modelli WhatsApp ed Email' },
       impostazioni: { title: 'Impostazioni', subtitle: 'Configura stati, fonti, corsi e altro' },
@@ -154,14 +199,24 @@
         navItems.forEach(n => n.classList.remove('active'));
         item.classList.add('active');
         showPage(item.dataset.page);
-        sidebar.classList.remove('open');
+        sidebarEl.classList.remove('open');
         sidebarOverlay.classList.remove('open');
       });
     });
 
+    // Stacca il listener real-time quando si esce dalla pagina Lead
+    let leadUnsubscribe = null;
+
     function showPage(page) {
+      // Stacca listener lead se si esce da quella pagina
+      if (leadUnsubscribe && page !== 'lead') {
+        leadUnsubscribe();
+        leadUnsubscribe = null;
+      }
       if (page === 'dashboard') {
         renderDashboard();
+      } else if (page === 'lead') {
+        renderLeadPage();
       } else {
         const data = placeholderPages[page];
         mainContent.innerHTML = `
@@ -180,36 +235,45 @@
     // MOBILE: HAMBURGER MENU
     // ============================================
     const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-
     hamburgerBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
+      sidebarEl.classList.toggle('open');
       sidebarOverlay.classList.toggle('open');
     });
-
     sidebarOverlay.addEventListener('click', () => {
-      sidebar.classList.remove('open');
+      sidebarEl.classList.remove('open');
       sidebarOverlay.classList.remove('open');
     });
 
     // ============================================
-    // DASHBOARD
+    // TOAST
+    // ============================================
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast toast-${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ============================================
+    //  MODALS
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // ============================================
+    // DASHBOARD (invariata)
     // ============================================
     let currentPeriod = 'month';
 
     function renderDashboard() {
-      const today = new Date().toLocaleDateString('it-IT', { 
-        weekday: 'long', day: 'numeric', month: 'long' 
+      const today = new Date().toLocaleDateString('it-IT', {
+        weekday: 'long', day: 'numeric', month: 'long'
       });
-
       mainContent.innerHTML = `
         <div class="page-header">
           <h1 class="page-title">Dashboard</h1>
           <p class="page-subtitle">Panoramica generale del CRM</p>
         </div>
-
-        <!-- FILTRO PERIODO -->
         <div class="filter-bar">
           <label>Periodo</label>
           <select id="periodSelect">
@@ -226,8 +290,6 @@
             <input type="date" id="dateTo">
           </div>
         </div>
-
-        <!-- CONTATORI -->
         <div class="counters-grid">
           <div class="counter-card">
             <div class="counter-icon" style="background:var(--primary-light)">
@@ -275,57 +337,33 @@
             </div>
           </div>
         </div>
-
-        <!-- SEZIONI -->
         <div class="sections-grid">
           <div class="section-card">
-            <div class="section-card-header">
-              <h3>Clienti Recenti</h3>
-              <span>Ultimi 10</span>
-            </div>
-            <div class="section-card-body" id="recentClients">
-              <div style="display:flex;justify-content:center;padding:30px;">
-                <div class="spinner"></div>
-              </div>
-            </div>
+            <div class="section-card-header"><h3>Clienti Recenti</h3><span>Ultimi 10</span></div>
+            <div class="section-card-body" id="recentClients"><div style="display:flex;justify-content:center;padding:30px;"><div class="spinner"></div></div></div>
           </div>
           <div class="section-card">
-            <div class="section-card-header">
-              <h3>Appuntamenti Oggi</h3>
-              <span>${today}</span>
-            </div>
-            <div class="section-card-body" id="todayAppointments">
-              <div style="display:flex;justify-content:center;padding:30px;">
-                <div class="spinner"></div>
-              </div>
-            </div>
+            <div class="section-card-header"><h3>Appuntamenti Oggi</h3><span>${today}</span></div>
+            <div class="section-card-body" id="todayAppointments"><div style="display:flex;justify-content:center;padding:30px;"><div class="spinner"></div></div></div>
           </div>
         </div>
       `;
-
-      // Bind eventi filtro
       const periodSelect = document.getElementById('periodSelect');
       const customDates = document.getElementById('customDates');
       periodSelect.value = currentPeriod;
       if (currentPeriod === 'custom') customDates.classList.add('visible');
-
       periodSelect.addEventListener('change', () => {
         currentPeriod = periodSelect.value;
         customDates.classList.toggle('visible', currentPeriod === 'custom');
         loadDashboardData();
       });
-
       document.getElementById('dateFrom')?.addEventListener('change', loadDashboardData);
       document.getElementById('dateTo')?.addEventListener('change', loadDashboardData);
-
-      // Carica dati
       loadDashboardData();
     }
 
-    // ====== CALCOLO PERIODO ======
     function getDateRange() {
       const now = new Date();
-
       if (currentPeriod === 'custom') {
         const fromEl = document.getElementById('dateFrom');
         const toEl = document.getElementById('dateTo');
@@ -333,46 +371,26 @@
         const to = toEl?.value ? new Date(toEl.value + 'T23:59:59') : now;
         return { from, to };
       }
-
       let from;
       switch (currentPeriod) {
-        case 'month':
-          from = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case 'quarter':
-          from = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-          break;
-        case 'semester':
-          from = now.getMonth() < 6
-            ? new Date(now.getFullYear(), 0, 1)
-            : new Date(now.getFullYear(), 6, 1);
-          break;
-        case 'year':
-          from = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          from = new Date(now.getFullYear(), now.getMonth(), 1);
+        case 'month': from = new Date(now.getFullYear(), now.getMonth(), 1); break;
+        case 'quarter': from = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1); break;
+        case 'semester': from = now.getMonth() < 6 ? new Date(now.getFullYear(), 0, 1) : new Date(now.getFullYear(), 6, 1); break;
+        case 'year': from = new Date(now.getFullYear(), 0, 1); break;
+        default: from = new Date(now.getFullYear(), now.getMonth(), 1);
       }
       return { from, to: now };
     }
 
-    // ====== CARICAMENTO DATI ======
     async function loadDashboardData() {
-      await Promise.all([
-        loadCounters(),
-        loadRecentClients(),
-        loadTodayAppointments()
-      ]);
+      await Promise.all([loadCounters(), loadRecentClients(), loadTodayAppointments()]);
     }
 
-    // --- CONTATORI ---
     async function loadCounters() {
       const { from, to } = getDateRange();
-
       try {
         const leadsSnap = await getDocs(collection(db, 'leads'));
         let totalLeads = 0, newLeads = 0, contratti = 0, iscritti = 0;
-
         leadsSnap.forEach(docSnap => {
           const d = docSnap.data();
           const created = d.dataCreazione?.toDate ? d.dataCreazione.toDate() : null;
@@ -383,10 +401,8 @@
             if (d.stato === 'Iscritto') iscritti++;
           }
         });
-
-        // Appuntamenti oggi
-        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-        const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         const appSnap = await getDocs(collection(db, 'appuntamenti'));
         let appOggi = 0;
         appSnap.forEach(docSnap => {
@@ -394,7 +410,6 @@
           const dt = d.data?.toDate ? d.data.toDate() : null;
           if (dt && dt >= todayStart && dt <= todayEnd) appOggi++;
         });
-
         setCounter('counterTotal', totalLeads);
         setCounter('counterAppointments', appOggi);
         setCounter('counterContracts', contratti);
@@ -402,7 +417,7 @@
         setCounter('counterNew', newLeads);
       } catch (err) {
         console.error('Errore contatori:', err);
-        ['counterTotal','counterAppointments','counterContracts','counterEnrolled','counterNew']
+        ['counterTotal', 'counterAppointments', 'counterContracts', 'counterEnrolled', 'counterNew']
           .forEach(id => setCounter(id, '–'));
       }
     }
@@ -412,57 +427,36 @@
       if (el) el.textContent = value;
     }
 
-    // --- CLIENTI RECENTI ---
     async function loadRecentClients() {
       const container = document.getElementById('recentClients');
       if (!container) return;
-
       try {
-        const q = query(collection(db, 'leads'), orderBy('dataCreazione', 'desc'), limit(10));
-        const snap = await getDocs(q);
-
+        const q2 = query(collection(db, 'leads'), orderBy('dataCreazione', 'desc'), limit(10));
+        const snap = await getDocs(q2);
         if (snap.empty) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <p>Nessun lead ancora</p>
-            </div>`;
+          container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p>Nessun lead ancora</p></div>`;
           return;
         }
-
-        // Carica gli stati per i colori
         const statiMap = await loadStatiColors();
-
         let html = '';
         snap.forEach(docSnap => {
           const d = docSnap.data();
           const nome = `${d.nome || ''} ${d.cognome || ''}`.trim() || 'Senza nome';
-          const data = d.dataCreazione?.toDate
-            ? d.dataCreazione.toDate().toLocaleDateString('it-IT', { day:'2-digit', month:'short' })
-            : '';
+          const data = d.dataCreazione?.toDate ? d.dataCreazione.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) : '';
           const stato = d.stato || 'Nuovo';
           const fonte = d.fonte || '—';
           const colore = statiMap[stato] || '#64748b';
-
-          html += `
-            <div class="section-row" data-id="${docSnap.id}">
-              <div class="section-row-left">
-                <div class="section-row-name">${nome}</div>
-                <div class="section-row-detail">${fonte} · ${data}</div>
-              </div>
-              <div class="section-row-right">
-                <span class="badge" style="background:${colore}18;color:${colore}">${stato}</span>
-              </div>
-            </div>`;
+          html += `<div class="section-row" data-id="${docSnap.id}"><div class="section-row-left"><div class="section-row-name">${nome}</div><div class="section-row-detail">${fonte} · ${data}</div></div><div class="section-row-right"><span class="badge" style="background:${colore}18;color:${colore}">${stato}</span></div></div>`;
         });
-
         container.innerHTML = html;
-
-        // Click → scheda lead (futuro modulo)
+        // Click per aprire il lead dalla dashboard
         container.querySelectorAll('.section-row').forEach(row => {
           row.addEventListener('click', () => {
-            console.log('Apri lead:', row.dataset.id);
-            // In futuro: navigazione alla scheda lead
+            // Vai alla pagina lead e apri il dettaglio
+            navItems.forEach(n => n.classList.remove('active'));
+            document.querySelector('[data-page="lead"]').classList.add('active');
+            showPage('lead');
+            setTimeout(() => openLeadDetail(row.dataset.id), 500);
           });
         });
       } catch (err) {
@@ -471,57 +465,33 @@
       }
     }
 
-    // --- APPUNTAMENTI OGGI ---
     async function loadTodayAppointments() {
       const container = document.getElementById('todayAppointments');
       if (!container) return;
-
       try {
         const snap = await getDocs(collection(db, 'appuntamenti'));
-        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-        const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
-
-        const today = [];
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+        const todayArr = [];
         snap.forEach(docSnap => {
           const d = docSnap.data();
           const dt = d.data?.toDate ? d.data.toDate() : null;
-          if (dt && dt >= todayStart && dt <= todayEnd) {
-            today.push({ id: docSnap.id, ...d, _date: dt });
-          }
+          if (dt && dt >= todayStart && dt <= todayEnd) todayArr.push({ id: docSnap.id, ...d, _date: dt });
         });
-
-        today.sort((a, b) => a._date - b._date);
-
-        if (today.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <p>Nessun appuntamento oggi</p>
-            </div>`;
+        todayArr.sort((a, b) => a._date - b._date);
+        if (todayArr.length === 0) {
+          container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>Nessun appuntamento oggi</p></div>`;
           return;
         }
-
         let html = '';
-        today.forEach(app => {
-          const ora = app.ora || app._date.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+        todayArr.forEach(app => {
+          const ora = app.ora || app._date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
           const nome = `${app.leadNome || ''} ${app.leadCognome || ''}`.trim() || '—';
           const tipo = app.tipo || 'nuovo';
           const tipoColor = tipo === 'richiamo' ? 'var(--orange)' : 'var(--primary)';
           const tipoLabel = tipo === 'richiamo' ? 'Richiamo' : 'Nuovo';
-
-          html += `
-            <div class="section-row" data-lead-id="${app.leadId || ''}">
-              <div class="section-row-left">
-                <div class="section-row-name">${nome}</div>
-                <div class="section-row-detail">${app.descrizione || ''}</div>
-              </div>
-              <div class="section-row-right">
-                <span style="font-size:13px;font-weight:600;color:var(--text)">${ora}</span>
-                <span class="badge" style="background:${tipoColor}18;color:${tipoColor}">${tipoLabel}</span>
-              </div>
-            </div>`;
+          html += `<div class="section-row"><div class="section-row-left"><div class="section-row-name">${nome}</div><div class="section-row-detail">${app.descrizione || ''}</div></div><div class="section-row-right"><span style="font-size:13px;font-weight:600;color:var(--text)">${ora}</span><span class="badge" style="background:${tipoColor}18;color:${tipoColor}">${tipoLabel}</span></div></div>`;
         });
-
         container.innerHTML = html;
       } catch (err) {
         console.error('Errore appuntamenti:', err);
@@ -529,21 +499,770 @@
       }
     }
 
-    // --- COLORI STATI DA FIRESTORE ---
     async function loadStatiColors() {
-      const map = { 'Nuovo': '#22c55e' }; // Default
+      const map = { 'Nuovo': '#22c55e' };
       try {
         const snap = await getDocs(collection(db, 'impostazioni', 'stati', 'items'));
         snap.forEach(docSnap => {
           const d = docSnap.data();
           if (d.nome && d.colore) map[d.nome] = d.colore;
         });
-      } catch (e) {
-        console.warn('Stati non caricati, uso default');
-      }
+      } catch (e) { console.warn('Stati non caricati, uso default'); }
       return map;
     }
-  </script>
 
+    // ============================================
+    // ============================================
+    //
+    //  MODULO LEAD — PIPELINE E GESTIONE
+    //
+    // ============================================
+    // ============================================
+
+    let allLeads = [];
+    let allStati = [];
+    let allFonti = [];
+    let leadCurrentView = 'kanban';
+    let selectedLeads = new Set();
+    let currentLeadId = null;
+    let leadImportData = [];
+    let leadSortField = 'dataCreazione';
+    let leadSortDir = 'desc';
+    let deleteCallback = null;
+
+    // --- LOAD STATI & FONTI ---
+    async function loadLeadStati() {
+      try {
+        const snap = await getDocs(query(collection(db, 'impostazioni', 'stati', 'items'), orderBy('posizione')));
+        allStati = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (e) {
+        console.warn('Errore caricamento stati:', e);
+        allStati = [{ id: 'default', nome: 'Nuovo', colore: '#22c55e', posizione: 0 }];
+      }
+    }
+
+    async function loadLeadFonti() {
+      try {
+        const snap = await getDocs(query(collection(db, 'impostazioni', 'fonti', 'items'), orderBy('posizione')));
+        allFonti = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (e) {
+        console.warn('Errore caricamento fonti:', e);
+        allFonti = [];
+      }
+    }
+
+    // --- RENDER PAGINA LEAD ---
+    async function renderLeadPage() {
+      mainContent.innerHTML = `<div style="display:flex;justify-content:center;padding:60px;"><div class="spinner"></div></div>`;
+      await loadLeadStati();
+      await loadLeadFonti();
+
+      // Fonti options
+      const fontiOptions = allFonti.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
+      const statiOptions = allStati.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+
+      mainContent.innerHTML = `
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 class="page-title">Lead</h1>
+            <p class="page-subtitle">Gestione contatti e pipeline</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" id="btnDownloadTemplate">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Scarica Template
+            </button>
+            <button class="btn btn-secondary" id="btnImportExcel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importa da Excel
+            </button>
+            <button class="btn btn-primary" id="btnNewLead" style="width:auto;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuovo Lead
+            </button>
+          </div>
+        </div>
+
+        <!-- FILTRI -->
+        <div class="filter-bar" style="margin-bottom:16px;">
+          <select id="leadFilterPeriodo">
+            <option value="mese">Mese corrente</option>
+            <option value="trimestre">Trimestre</option>
+            <option value="semestre">Semestre</option>
+            <option value="anno">Anno</option>
+            <option value="tutti">Tutti</option>
+            <option value="personalizzato">Personalizzato</option>
+          </select>
+          <div class="custom-dates" id="leadDateRange">
+            <span style="font-size:13px;color:var(--text-secondary)">Da</span>
+            <input type="date" id="leadFilterDa">
+            <span style="font-size:13px;color:var(--text-secondary)">A</span>
+            <input type="date" id="leadFilterA">
+          </div>
+          <select id="leadFilterFonte">
+            <option value="">Tutte le fonti</option>
+            ${fontiOptions}
+          </select>
+          <select id="leadFilterStato">
+            <option value="">Tutti gli stati</option>
+            ${statiOptions}
+          </select>
+          <input type="text" id="leadSearchInput" placeholder="Cerca nome, cognome, telefono, email..." style="min-width:200px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:var(--font);color:var(--text);outline:none;">
+          <div class="lead-view-toggle" style="margin-left:auto;">
+            <button class="active" id="btnViewKanban">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+              Kanban
+            </button>
+            <button id="btnViewElenco">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Elenco
+            </button>
+          </div>
+        </div>
+
+        <!-- BULK BAR -->
+        <div class="lead-bulk-bar" id="leadBulkBar">
+          <span id="leadBulkCount">0 selezionati</span>
+          <button class="btn btn-red" style="padding:6px 14px;font-size:12px;" id="btnDeleteSelected">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Elimina selezionati
+          </button>
+        </div>
+
+        <!-- KANBAN -->
+        <div class="lead-kanban" id="leadKanban"></div>
+
+        <!-- ELENCO -->
+        <div class="lead-list" id="leadList" style="display:none;">
+          <table class="lead-table">
+            <thead>
+              <tr>
+                <th style="width:40px;text-align:center;"><input type="checkbox" id="leadSelectAll"></th>
+                <th data-sort="nome">Nome <span class="sort-arrow">↕</span></th>
+                <th data-sort="cognome">Cognome <span class="sort-arrow">↕</span></th>
+                <th data-sort="telefono">Telefono <span class="sort-arrow">↕</span></th>
+                <th data-sort="email">Email <span class="sort-arrow">↕</span></th>
+                <th data-sort="fonte">Fonte <span class="sort-arrow">↕</span></th>
+                <th data-sort="stato">Stato <span class="sort-arrow">↕</span></th>
+                <th data-sort="dataCreazione">Data <span class="sort-arrow">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="leadListBody"></tbody>
+          </table>
+        </div>
+      `;
+
+      // Bind eventi
+      document.getElementById('btnNewLead').addEventListener('click', openNewLead);
+      document.getElementById('btnImportExcel').addEventListener('click', () => openModal('importModal'));
+      document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplate);
+      document.getElementById('btnDeleteSelected').addEventListener('click', deleteSelectedLeads);
+
+      document.getElementById('leadFilterPeriodo').addEventListener('change', function () {
+        document.getElementById('leadDateRange').classList.toggle('visible', this.value === 'personalizzato');
+        renderLeadView();
+      });
+      document.getElementById('leadFilterFonte').addEventListener('change', renderLeadView);
+      document.getElementById('leadFilterStato').addEventListener('change', renderLeadView);
+      document.getElementById('leadSearchInput').addEventListener('input', renderLeadView);
+      document.getElementById('leadFilterDa').addEventListener('change', renderLeadView);
+      document.getElementById('leadFilterA').addEventListener('change', renderLeadView);
+
+      document.getElementById('btnViewKanban').addEventListener('click', () => setLeadView('kanban'));
+      document.getElementById('btnViewElenco').addEventListener('click', () => setLeadView('elenco'));
+
+      document.getElementById('leadSelectAll').addEventListener('change', function () {
+        const leads = getFilteredLeads();
+        if (this.checked) leads.forEach(l => selectedLeads.add(l.id));
+        else selectedLeads.clear();
+        updateBulkBar();
+        renderLeadView();
+      });
+
+      // Table header sort
+      document.querySelectorAll('.lead-table th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const field = th.dataset.sort;
+          if (leadSortField === field) leadSortDir = leadSortDir === 'asc' ? 'desc' : 'asc';
+          else { leadSortField = field; leadSortDir = 'asc'; }
+          renderLeadList();
+        });
+      });
+
+      // Ascolta i lead in tempo reale
+      leadUnsubscribe = onSnapshot(
+        query(collection(db, 'leads'), orderBy('dataCreazione', 'desc')),
+        (snap) => {
+          allLeads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderLeadView();
+        }
+      );
+    }
+
+    // --- FILTRI LEAD ---
+    function getFilteredLeads() {
+      let leads = [...allLeads];
+      const periodo = document.getElementById('leadFilterPeriodo')?.value || 'tutti';
+      const now = new Date();
+      let startDate = null, endDate = null;
+
+      if (periodo === 'mese') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      else if (periodo === 'trimestre') startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      else if (periodo === 'semestre') startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      else if (periodo === 'anno') startDate = new Date(now.getFullYear(), 0, 1);
+      else if (periodo === 'personalizzato') {
+        const da = document.getElementById('leadFilterDa')?.value;
+        const a = document.getElementById('leadFilterA')?.value;
+        if (da) startDate = new Date(da);
+        if (a) { endDate = new Date(a); endDate.setHours(23, 59, 59); }
+      }
+
+      if (startDate) leads = leads.filter(l => {
+        const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
+        return d >= startDate;
+      });
+      if (endDate) leads = leads.filter(l => {
+        const d = l.dataCreazione?.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
+        return d <= endDate;
+      });
+
+      const fonte = document.getElementById('leadFilterFonte')?.value;
+      if (fonte) leads = leads.filter(l => l.fonte === fonte);
+
+      const stato = document.getElementById('leadFilterStato')?.value;
+      if (stato) leads = leads.filter(l => l.stato === stato);
+
+      const q = (document.getElementById('leadSearchInput')?.value || '').toLowerCase().trim();
+      if (q) leads = leads.filter(l =>
+        (l.nome || '').toLowerCase().includes(q) ||
+        (l.cognome || '').toLowerCase().includes(q) ||
+        (l.telefono || '').toLowerCase().includes(q) ||
+        (l.email || '').toLowerCase().includes(q)
+      );
+      return leads;
+    }
+
+    function renderLeadView() {
+      if (leadCurrentView === 'kanban') renderLeadKanban();
+      else renderLeadList();
+      updateBulkBar();
+    }
+
+    function setLeadView(view) {
+      leadCurrentView = view;
+      document.getElementById('btnViewKanban').classList.toggle('active', view === 'kanban');
+      document.getElementById('btnViewElenco').classList.toggle('active', view === 'elenco');
+      document.getElementById('leadKanban').style.display = view === 'kanban' ? 'flex' : 'none';
+      document.getElementById('leadList').style.display = view === 'elenco' ? 'block' : 'none';
+      renderLeadView();
+    }
+
+    // --- KANBAN ---
+    function renderLeadKanban() {
+      const container = document.getElementById('leadKanban');
+      if (!container) return;
+      const leads = getFilteredLeads();
+      container.innerHTML = '';
+
+      allStati.forEach(stato => {
+        const colLeads = leads.filter(l => l.stato === stato.nome);
+        const col = document.createElement('div');
+        col.className = 'kanban-col';
+
+        const headerBg = stato.colore + '20';
+        col.innerHTML = `<div class="kanban-col-header" style="background:${headerBg}"><span class="kanban-col-title" style="color:${stato.colore}">${stato.nome}</span><span class="kanban-col-count" style="color:${stato.colore}">${colLeads.length}</span></div>`;
+
+        const body = document.createElement('div');
+        body.className = 'kanban-col-body';
+        body.dataset.stato = stato.nome;
+
+        body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('drag-over'); });
+        body.addEventListener('dragleave', () => body.classList.remove('drag-over'));
+        body.addEventListener('drop', e => {
+          e.preventDefault();
+          body.classList.remove('drag-over');
+          const leadId = e.dataTransfer.getData('text/plain');
+          moveLeadToStato(leadId, body.dataset.stato);
+        });
+
+        colLeads.forEach(lead => {
+          const card = document.createElement('div');
+          card.className = 'kanban-card';
+          card.draggable = true;
+          card.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', lead.id); card.classList.add('dragging'); });
+          card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+          const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
+          const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+          const checked = selectedLeads.has(lead.id) ? 'checked' : '';
+
+          card.innerHTML = `
+            <input type="checkbox" class="kanban-card-check" ${checked}>
+            <div class="kanban-card-name">${lead.nome} ${lead.cognome}</div>
+            <div class="kanban-card-phone">${lead.telefono || ''}</div>
+            <div class="kanban-card-meta">
+              ${lead.fonte ? `<span class="kanban-card-fonte">${lead.fonte}</span>` : '<span></span>'}
+              <span class="kanban-card-date">${dateStr}</span>
+            </div>
+          `;
+
+          card.querySelector('.kanban-card-check').addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleLeadSelect(lead.id);
+          });
+          card.querySelector('.kanban-card-name').addEventListener('click', () => openLeadDetail(lead.id));
+
+          body.appendChild(card);
+        });
+
+        col.appendChild(body);
+        container.appendChild(col);
+      });
+    }
+
+    // --- ELENCO ---
+    function renderLeadList() {
+      const tbody = document.getElementById('leadListBody');
+      if (!tbody) return;
+      let leads = getFilteredLeads();
+
+      leads.sort((a, b) => {
+        let va = a[leadSortField] || '';
+        let vb = b[leadSortField] || '';
+        if (leadSortField === 'dataCreazione') {
+          va = va?.toDate ? va.toDate().getTime() : new Date(va).getTime();
+          vb = vb?.toDate ? vb.toDate().getTime() : new Date(vb).getTime();
+        }
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return leadSortDir === 'asc' ? -1 : 1;
+        if (va > vb) return leadSortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      tbody.innerHTML = '';
+      leads.forEach(lead => {
+        const date = lead.dataCreazione?.toDate ? lead.dataCreazione.toDate() : new Date(lead.dataCreazione);
+        const dateStr = date.toLocaleDateString('it-IT');
+        const stato = allStati.find(s => s.nome === lead.stato);
+        const badgeBg = stato ? stato.colore + '20' : '#f1f5f9';
+        const badgeColor = stato ? stato.colore : '#64748b';
+        const checked = selectedLeads.has(lead.id) ? 'checked' : '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;"><input type="checkbox" ${checked} data-id="${lead.id}"></td>
+          <td>${lead.nome || ''}</td>
+          <td>${lead.cognome || ''}</td>
+          <td>${lead.telefono || ''}</td>
+          <td>${lead.email || ''}</td>
+          <td>${lead.fonte || ''}</td>
+          <td><span class="badge" style="background:${badgeBg};color:${badgeColor}">${lead.stato || ''}</span></td>
+          <td>${dateStr}</td>
+        `;
+        tr.querySelector('input[type="checkbox"]').addEventListener('change', () => toggleLeadSelect(lead.id));
+        tr.addEventListener('click', e => {
+          if (e.target.type === 'checkbox') return;
+          openLeadDetail(lead.id);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- SELEZIONE ---
+    function toggleLeadSelect(id) {
+      if (selectedLeads.has(id)) selectedLeads.delete(id);
+      else selectedLeads.add(id);
+      updateBulkBar();
+    }
+
+    function updateBulkBar() {
+      const bar = document.getElementById('leadBulkBar');
+      if (!bar) return;
+      const count = selectedLeads.size;
+      document.getElementById('leadBulkCount').textContent = `${count} selezionat${count === 1 ? 'o' : 'i'}`;
+      bar.classList.toggle('visible', count > 0);
+    }
+
+    // --- DRAG & DROP ---
+    async function moveLeadToStato(leadId, newStato) {
+      const lead = allLeads.find(l => l.id === leadId);
+      if (!lead || lead.stato === newStato) return;
+      const oldStato = lead.stato;
+      await updateDoc(doc(db, 'leads', leadId), { stato: newStato });
+      await addDoc(collection(db, 'leads', leadId, 'storicoStati'), {
+        statoPrecedente: oldStato,
+        statoNuovo: newStato,
+        data: serverTimestamp(),
+        origine: 'Cambio manuale'
+      });
+      showToast(`Stato: ${oldStato} → ${newStato}`, 'success');
+    }
+
+    // --- LEAD DETAIL PANEL ---
+    const leadOverlay = document.getElementById('leadOverlay');
+    const leadPanel = document.getElementById('leadPanel');
+    const leadPanelClose = document.getElementById('leadPanelClose');
+
+    leadOverlay.addEventListener('click', closeLeadPanel);
+    leadPanelClose.addEventListener('click', closeLeadPanel);
+
+    function openLeadPanel() {
+      leadOverlay.classList.add('open');
+      leadPanel.classList.add('open');
+    }
+
+    function closeLeadPanel() {
+      leadOverlay.classList.remove('open');
+      leadPanel.classList.remove('open');
+      currentLeadId = null;
+    }
+
+    function openNewLead() {
+      currentLeadId = null;
+      document.getElementById('leadPanelTitle').textContent = 'Nuovo Lead';
+      const fontiOpts = allFonti.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
+      const statiOpts = allStati.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+
+      document.getElementById('leadPanelBody').innerHTML = `
+        <div class="lead-section">
+          <h3 class="lead-section-title">Anagrafica</h3>
+          <div class="lead-form-grid">
+            <div class="form-group"><label class="required">Nome</label><input type="text" id="fNome"></div>
+            <div class="form-group"><label class="required">Cognome</label><input type="text" id="fCognome"></div>
+            <div class="form-group"><label class="required">Telefono</label><input type="tel" id="fTelefono"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="fEmail"></div>
+            <div class="form-group"><label>Fonte</label><select id="fFonte"><option value="">Seleziona...</option>${fontiOpts}</select></div>
+            <div class="form-group"><label>Priorità</label><select id="fPriorita"><option value="">Nessuna</option><option value="bassa">Bassa</option><option value="media">Media</option><option value="alta">Alta</option></select></div>
+            <div class="form-group"><label>Provincia</label><input type="text" id="fProvincia"></div>
+            <div class="form-group"><label>È minore?</label><select id="fIsMinore"><option value="false">No</option><option value="true">Sì</option></select></div>
+            <div class="form-group" style="grid-column:1/-1"><label>Note</label><textarea id="fNote" rows="2"></textarea></div>
+          </div>
+        </div>
+        <div class="lead-section" id="genitoreSection" style="display:none">
+          <h3 class="lead-section-title">Dati Genitore / Tutore</h3>
+          <div class="lead-form-grid">
+            <div class="form-group"><label>Nome</label><input type="text" id="fGenNome"></div>
+            <div class="form-group"><label>Cognome</label><input type="text" id="fGenCognome"></div>
+            <div class="form-group"><label>Telefono</label><input type="tel" id="fGenTelefono"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="fGenEmail"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-secondary" id="btnCancelLead">Annulla</button>
+          <button class="btn btn-green" id="btnSaveLead">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva
+          </button>
+        </div>
+      `;
+
+      document.getElementById('fIsMinore').addEventListener('change', function () {
+        document.getElementById('genitoreSection').style.display = this.value === 'true' ? 'block' : 'none';
+      });
+      document.getElementById('btnCancelLead').addEventListener('click', closeLeadPanel);
+      document.getElementById('btnSaveLead').addEventListener('click', saveLead);
+      openLeadPanel();
+    }
+
+    async function openLeadDetail(id) {
+      currentLeadId = id;
+      const lead = allLeads.find(l => l.id === id);
+      if (!lead) return;
+
+      document.getElementById('leadPanelTitle').textContent = `${lead.nome} ${lead.cognome}`;
+      const fontiOpts = allFonti.map(f => `<option value="${f.nome}" ${lead.fonte === f.nome ? 'selected' : ''}>${f.nome}</option>`).join('');
+      const statiOpts = allStati.map(s => `<option value="${s.nome}" ${lead.stato === s.nome ? 'selected' : ''}>${s.nome}</option>`).join('');
+      const prioOpts = ['', 'bassa', 'media', 'alta'].map(p => `<option value="${p}" ${(lead.priorita || '') === p ? 'selected' : ''}>${p || 'Nessuna'}</option>`).join('');
+
+      document.getElementById('leadPanelBody').innerHTML = `
+        <!-- AZIONI RAPIDE -->
+        <div class="lead-actions-bar">
+          <select class="btn btn-secondary" id="fStatoSelect" style="font-weight:600;padding:6px 12px;font-size:12px;">${statiOpts}</select>
+          <button class="btn btn-whatsapp" style="padding:6px 12px;font-size:12px;" id="btnWA"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 0 0 .613.613l4.458-1.495A11.952 11.952 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.352 0-4.55-.752-6.338-2.034l-.442-.332-3.263 1.093 1.093-3.263-.332-.442A9.955 9.955 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg> WhatsApp</button>
+          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" id="btnEmail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</button>
+          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" id="btnCall"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Chiama</button>
+          <button class="btn btn-red" style="padding:6px 12px;font-size:12px;" id="btnDeleteLead"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Elimina</button>
+        </div>
+
+        <!-- FORM -->
+        <div class="lead-section">
+          <h3 class="lead-section-title">Anagrafica</h3>
+          <div class="lead-form-grid">
+            <div class="form-group"><label class="required">Nome</label><input type="text" id="fNome" value="${lead.nome || ''}"></div>
+            <div class="form-group"><label class="required">Cognome</label><input type="text" id="fCognome" value="${lead.cognome || ''}"></div>
+            <div class="form-group"><label class="required">Telefono</label><input type="tel" id="fTelefono" value="${lead.telefono || ''}"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="fEmail" value="${lead.email || ''}"></div>
+            <div class="form-group"><label>Fonte</label><select id="fFonte"><option value="">Seleziona...</option>${fontiOpts}</select></div>
+            <div class="form-group"><label>Priorità</label><select id="fPriorita">${prioOpts}</select></div>
+            <div class="form-group"><label>Provincia</label><input type="text" id="fProvincia" value="${lead.provincia || ''}"></div>
+            <div class="form-group"><label>È minore?</label><select id="fIsMinore"><option value="false" ${!lead.isMinore ? 'selected' : ''}>No</option><option value="true" ${lead.isMinore ? 'selected' : ''}>Sì</option></select></div>
+            <div class="form-group" style="grid-column:1/-1"><label>Note</label><textarea id="fNote" rows="2">${lead.note || ''}</textarea></div>
+          </div>
+        </div>
+        <div class="lead-section" id="genitoreSection" style="display:${lead.isMinore ? 'block' : 'none'}">
+          <h3 class="lead-section-title">Dati Genitore / Tutore</h3>
+          <div class="lead-form-grid">
+            <div class="form-group"><label>Nome</label><input type="text" id="fGenNome" value="${lead.genitore?.nome || ''}"></div>
+            <div class="form-group"><label>Cognome</label><input type="text" id="fGenCognome" value="${lead.genitore?.cognome || ''}"></div>
+            <div class="form-group"><label>Telefono</label><input type="tel" id="fGenTelefono" value="${lead.genitore?.telefono || ''}"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="fGenEmail" value="${lead.genitore?.email || ''}"></div>
+          </div>
+        </div>
+
+        <!-- STORICO -->
+        <div class="lead-section">
+          <h3 class="lead-section-title">Storico Stati</h3>
+          <div id="storicoTimeline"><div style="display:flex;justify-content:center;padding:20px;"><div class="spinner"></div></div></div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-secondary" id="btnCancelLead">Annulla</button>
+          <button class="btn btn-green" id="btnSaveLead">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva
+          </button>
+        </div>
+      `;
+
+      // Bind events
+      document.getElementById('fIsMinore').addEventListener('change', function () {
+        document.getElementById('genitoreSection').style.display = this.value === 'true' ? 'block' : 'none';
+      });
+      document.getElementById('btnCancelLead').addEventListener('click', closeLeadPanel);
+      document.getElementById('btnSaveLead').addEventListener('click', saveLead);
+      document.getElementById('fStatoSelect').addEventListener('change', async function () {
+        await moveLeadToStato(id, this.value);
+        await loadStorico(id);
+      });
+      document.getElementById('btnWA').addEventListener('click', () => {
+        const tel = document.getElementById('fTelefono').value.replace(/\D/g, '');
+        if (tel) window.open(`https://wa.me/39${tel}`, '_blank');
+      });
+      document.getElementById('btnEmail').addEventListener('click', () => {
+        const email = document.getElementById('fEmail').value;
+        if (email) window.open(`mailto:${email}`);
+      });
+      document.getElementById('btnCall').addEventListener('click', () => {
+        const tel = document.getElementById('fTelefono').value;
+        if (tel) window.open(`tel:${tel}`);
+      });
+      document.getElementById('btnDeleteLead').addEventListener('click', () => {
+        document.getElementById('deleteMessage').textContent = 'Sei sicuro di voler eliminare questo lead? Questa azione è irreversibile.';
+        deleteCallback = async () => {
+          await deleteDoc(doc(db, 'leads', currentLeadId));
+          closeLeadPanel();
+          showToast('Lead eliminato', 'info');
+        };
+        openModal('deleteModal');
+      });
+
+      openLeadPanel();
+      loadStorico(id);
+    }
+
+    async function loadStorico(leadId) {
+      const timeline = document.getElementById('storicoTimeline');
+      if (!timeline) return;
+      try {
+        const snap = await getDocs(query(collection(db, 'leads', leadId, 'storicoStati'), orderBy('data', 'desc')));
+        if (snap.empty) {
+          timeline.innerHTML = '<p style="font-size:12px;color:var(--text-secondary);">Nessun cambio di stato registrato.</p>';
+          return;
+        }
+        let html = '';
+        snap.docs.forEach(d => {
+          const s = d.data();
+          const date = s.data?.toDate ? s.data.toDate() : new Date();
+          const statoObj = allStati.find(st => st.nome === s.statoNuovo);
+          const color = statoObj ? statoObj.colore : '#94a3b8';
+          html += `<div class="timeline-item" style="border-left-color:${color}"><div class="ti-content"><div class="ti-value">${s.statoPrecedente || '—'} → ${s.statoNuovo}</div><div class="ti-label">${s.origine || ''}</div></div><div class="ti-date">${date.toLocaleDateString('it-IT')} ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</div></div>`;
+        });
+        timeline.innerHTML = html;
+      } catch (e) {
+        timeline.innerHTML = '<p style="font-size:12px;color:var(--text-secondary);">Errore caricamento storico.</p>';
+      }
+    }
+
+    // --- SAVE LEAD ---
+    async function saveLead() {
+      const nome = document.getElementById('fNome').value.trim();
+      const cognome = document.getElementById('fCognome').value.trim();
+      const telefono = document.getElementById('fTelefono').value.trim();
+      if (!nome || !cognome || !telefono) {
+        showToast('Nome, Cognome e Telefono sono obbligatori', 'error');
+        return;
+      }
+
+      const data = {
+        nome, cognome, telefono,
+        email: document.getElementById('fEmail').value.trim(),
+        fonte: document.getElementById('fFonte').value,
+        priorita: document.getElementById('fPriorita').value,
+        provincia: document.getElementById('fProvincia').value.trim(),
+        isMinore: document.getElementById('fIsMinore').value === 'true',
+        note: document.getElementById('fNote').value.trim(),
+      };
+
+      if (data.isMinore) {
+        data.genitore = {
+          nome: document.getElementById('fGenNome')?.value.trim() || '',
+          cognome: document.getElementById('fGenCognome')?.value.trim() || '',
+          telefono: document.getElementById('fGenTelefono')?.value.trim() || '',
+          email: document.getElementById('fGenEmail')?.value.trim() || '',
+        };
+      }
+
+      try {
+        if (currentLeadId) {
+          await updateDoc(doc(db, 'leads', currentLeadId), data);
+          showToast('Lead aggiornato!', 'success');
+        } else {
+          data.stato = 'Nuovo';
+          data.dataCreazione = serverTimestamp();
+          const ref = await addDoc(collection(db, 'leads'), data);
+          await addDoc(collection(db, 'leads', ref.id, 'storicoStati'), {
+            statoPrecedente: null, statoNuovo: 'Nuovo',
+            data: serverTimestamp(), origine: 'Creazione manuale'
+          });
+          showToast('Lead creato!', 'success');
+        }
+        closeLeadPanel();
+      } catch (err) {
+        console.error(err);
+        showToast('Errore nel salvataggio', 'error');
+      }
+    }
+
+    // --- DELETE SELECTED ---
+    function deleteSelectedLeads() {
+      const count = selectedLeads.size;
+      if (count === 0) return;
+      document.getElementById('deleteMessage').textContent = `Sei sicuro di voler eliminare ${count} lead? Questa azione è irreversibile.`;
+      deleteCallback = async () => {
+        for (const id of selectedLeads) {
+          await deleteDoc(doc(db, 'leads', id));
+        }
+        selectedLeads.clear();
+        updateBulkBar();
+        showToast(`${count} lead eliminati`, 'info');
+      };
+      openModal('deleteModal');
+    }
+
+    // --- DELETE MODAL ---
+    document.getElementById('deleteCancelBtn').addEventListener('click', () => closeModal('deleteModal'));
+    document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+      if (deleteCallback) await deleteCallback();
+      deleteCallback = null;
+      closeModal('deleteModal');
+    });
+
+    // --- IMPORT EXCEL ---
+    const dropzone = document.getElementById('dropzone');
+    const importFileInput = document.getElementById('importFileInput');
+
+    dropzone.addEventListener('click', () => importFileInput.click());
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) parseExcel(e.dataTransfer.files[0]);
+    });
+    importFileInput.addEventListener('change', () => {
+      if (importFileInput.files[0]) parseExcel(importFileInput.files[0]);
+    });
+
+    document.getElementById('importCancelBtn').addEventListener('click', () => {
+      closeModal('importModal');
+      resetImport();
+    });
+    document.getElementById('importConfirmBtn').addEventListener('click', confirmImport);
+
+    function parseExcel(file) {
+      document.getElementById('importFileName').textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const wb = XLSX.read(e.target.result, { type: 'binary' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+          leadImportData = [];
+          let errors = 0;
+          const previewBody = document.getElementById('previewBody');
+          previewBody.innerHTML = '';
+
+          json.forEach((row, i) => {
+            const nome = (row['Nome'] || row['nome'] || '').toString().trim();
+            const cognome = (row['Cognome'] || row['cognome'] || '').toString().trim();
+            const telefono = (row['Telefono'] || row['telefono'] || '').toString().trim();
+            const email = (row['Email'] || row['email'] || '').toString().trim();
+            const fonte = (row['Fonte'] || row['fonte'] || '').toString().trim();
+            const note = (row['Note'] || row['note'] || '').toString().trim();
+            const valid = nome && cognome && telefono;
+            if (!valid) errors++;
+            leadImportData.push({ nome, cognome, telefono, email, fonte, note, valid });
+
+            const tr = document.createElement('tr');
+            if (!valid) tr.className = 'error-row';
+            tr.innerHTML = `<td>${i + 1}</td><td>${nome || '<em style="color:var(--red)">mancante</em>'}</td><td>${cognome || '<em style="color:var(--red)">mancante</em>'}</td><td>${telefono || '<em style="color:var(--red)">mancante</em>'}</td><td>${email}</td><td>${fonte}</td><td>${note}</td><td>${valid ? '✓' : '<span style="color:var(--red)">✗</span>'}</td>`;
+            previewBody.appendChild(tr);
+          });
+
+          document.getElementById('importErrors').textContent = errors > 0 ? `${errors} righe con errori (verranno saltate)` : '';
+          document.getElementById('importStep1').style.display = 'none';
+          document.getElementById('importStep2').style.display = 'block';
+          document.getElementById('importConfirmBtn').style.display = 'inline-flex';
+        } catch (err) {
+          showToast('Errore nella lettura del file', 'error');
+          console.error(err);
+        }
+      };
+      reader.readAsBinaryString(file);
+    }
+
+    async function confirmImport() {
+      const validRows = leadImportData.filter(r => r.valid);
+      if (validRows.length === 0) { showToast('Nessuna riga valida', 'error'); return; }
+      try {
+        for (const row of validRows) {
+          const ref = await addDoc(collection(db, 'leads'), {
+            nome: row.nome, cognome: row.cognome, telefono: row.telefono,
+            email: row.email, fonte: row.fonte, note: row.note,
+            stato: 'Nuovo', dataCreazione: serverTimestamp()
+          });
+          await addDoc(collection(db, 'leads', ref.id, 'storicoStati'), {
+            statoPrecedente: null, statoNuovo: 'Nuovo',
+            data: serverTimestamp(), origine: 'Import Excel'
+          });
+        }
+        showToast(`${validRows.length} lead importati!`, 'success');
+        closeModal('importModal');
+        resetImport();
+      } catch (err) {
+        showToast('Errore durante l\'import', 'error');
+        console.error(err);
+      }
+    }
+
+    function resetImport() {
+      leadImportData = [];
+      document.getElementById('importStep1').style.display = 'block';
+      document.getElementById('importStep2').style.display = 'none';
+      document.getElementById('importConfirmBtn').style.display = 'none';
+      importFileInput.value = '';
+    }
+
+    // --- DOWNLOAD TEMPLATE ---
+    function downloadTemplate() {
+      const data = [{ Nome: 'Mario', Cognome: 'Rossi', Telefono: '3331234567', Email: 'mario@email.com', Fonte: 'Sito Web', Note: 'Interessato al corso AFM' }];
+      const ws = XLSX.utils.json_to_sheet(data);
+      ws['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 30 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Template Lead');
+      XLSX.writeFile(wb, 'Template_Import_Lead.xlsx');
+    }
+  </script>
 </body>
 </html>
