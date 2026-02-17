@@ -1,0 +1,26 @@
+/* ── Template Module ── */
+.tpl-variables-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tpl-var-btn {
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  font-family: 'Inter', monospace;
+  letter-spacing: -0.2px;
+}
+
+.tpl-preview-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.6;
+  min-height: 60px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
