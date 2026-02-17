@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silvia — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">SILVIA</div>
+            <div class="login-payoff">Vendita</div>
+
+            <div class="login-error" id="loginError">Credenziali non valide</div>
+
+            <div class="form-group">
+                <label class="form-label" for="loginId">ID</label>
+                <input type="text" class="form-input" id="loginId" placeholder="Inserisci il tuo ID" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="loginPassword">Password</label>
+                <input type="password" class="form-input" id="loginPassword" placeholder="Inserisci la password" autocomplete="current-password">
+            </div>
+
+            <button class="btn btn-primary" id="loginBtn">Accedi</button>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Se già loggato, vai alla dashboard
+        if (sessionStorage.getItem('silvia_logged') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+
+        const loginBtn = document.getElementById('loginBtn');
+        const loginId = document.getElementById('loginId');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
+
+        function attemptLogin() {
+            const id = loginId.value.trim();
+            const pw = loginPassword.value;
+
+            if (doLogin(id, pw)) {
+                window.location.href = 'dashboard.html';
+            } else {
+                loginError.classList.add('visible');
+                loginPassword.value = '';
+                loginPassword.focus();
+            }
+        }
+
+        loginBtn.addEventListener('click', attemptLogin);
+        loginPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+        loginId.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginPassword.focus();
+        });
+
+        // Nascondi errore quando si riprova
+        [loginId, loginPassword].forEach(el => {
+            el.addEventListener('input', () => loginError.classList.remove('visible'));
+        });
+    </script>
+</body>
+</html>
