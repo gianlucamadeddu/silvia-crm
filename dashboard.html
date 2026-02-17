@@ -13,19 +13,69 @@
         <main class="main-content">
             <div class="page-header">
                 <h1>Dashboard</h1>
+                <div id="periodContainer"></div>
             </div>
             <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+
+                <!-- Contatori -->
+                <div class="counters-row" id="countersRow">
+                    <div class="counter-card">
+                        <div class="counter-icon blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <div class="counter-value" id="countLeadTotali">0</div>
+                            <div class="counter-label">Lead Totali</div>
+                        </div>
                     </div>
-                    <p class="empty-state-text">Dashboard — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+                    <div class="counter-card">
+                        <div class="counter-icon pink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <div class="counter-value" id="countAppuntamentiOggi">0</div>
+                            <div class="counter-label">Appuntamenti Oggi</div>
+                        </div>
+                    </div>
+                    <div class="counter-card">
+                        <div class="counter-icon green">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div>
+                            <div class="counter-value" id="countIscritti">0</div>
+                            <div class="counter-label">Iscritti</div>
+                        </div>
+                    </div>
+                    <div class="counter-card">
+                        <div class="counter-icon yellow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <div>
+                            <div class="counter-value" id="countNuoviLead">0</div>
+                            <div class="counter-label">Nuovi Lead</div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Griglia 2 colonne: Clienti Recenti + Appuntamenti Oggi -->
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Clienti Recenti</h3>
+                        </div>
+                        <div id="clientiRecentiList"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Appuntamenti Oggi</h3>
+                        </div>
+                        <div id="appuntamentiOggiList"></div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
@@ -33,8 +83,5 @@
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/dashboard.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => renderSidebar('dashboard'));
-    </script>
 </body>
 </html>
