@@ -14,21 +14,125 @@
         <main class="main-content">
             <div class="page-header">
                 <h1>Agenda Calendario</h1>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" id="btnNuovoAppuntamento">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuovo Appuntamento
+                    </button>
+                </div>
             </div>
+
             <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                    <p class="empty-state-text">Agenda Calendario — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+                <!-- Toolbar calendario -->
+                <div class="cal-toolbar">
+                    <div class="cal-toolbar-left">
+                        <button class="btn btn-secondary btn-sm" id="btnOggi">Oggi</button>
+                        <div class="cal-nav">
+                            <button class="btn btn-ghost btn-icon" id="btnPrev">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                            <button class="btn btn-ghost btn-icon" id="btnNext">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                        <h2 class="cal-current-label" id="calLabel">Febbraio 2026</h2>
+                    </div>
+                    <div class="cal-toolbar-right">
+                        <div class="cal-view-toggle" id="viewToggle">
+                            <button class="cal-view-btn active" data-view="month">Mese</button>
+                            <button class="cal-view-btn" data-view="week">Settimana</button>
+                            <button class="cal-view-btn" data-view="day">Giorno</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Container calendario -->
+                <div class="cal-container" id="calContainer">
+                    <!-- Viene popolato da JS -->
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Modale Creazione / Modifica Appuntamento -->
+    <div class="modal-overlay hidden" id="modalAppuntamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalAppTitle">Nuovo Appuntamento</h2>
+                <button class="modal-close" id="modalAppClose">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Data *</label>
+                        <input type="date" class="form-input" id="appData">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ora *</label>
+                        <input type="time" class="form-input" id="appOra">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo *</label>
+                    <select class="form-select" id="appTipo">
+                        <option value="nuovo">Nuovo</option>
+                        <option value="richiamo">Richiamo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lead (cerca per nome o cognome)</label>
+                    <div class="lead-search-wrapper">
+                        <input type="text" class="form-input" id="appLeadSearch" placeholder="Digita per cercare..." autocomplete="off">
+                        <div class="lead-search-results hidden" id="leadSearchResults"></div>
+                    </div>
+                    <input type="hidden" id="appLeadId">
+                    <div class="lead-selected hidden" id="leadSelected">
+                        <span id="leadSelectedName"></span>
+                        <button type="button" class="btn-ghost btn-sm" id="leadSelectedClear" style="padding:2px 6px;font-size:12px;">✕</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrizione</label>
+                    <textarea class="form-textarea" id="appDescrizione" rows="3" placeholder="Note sull'appuntamento..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnAnnullaApp">Annulla</button>
+                <button class="btn btn-primary" id="btnSalvaApp">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Dettaglio Appuntamento -->
+    <div class="modal-overlay hidden" id="modalDettaglio">
+        <div class="modal-content" style="max-width:480px">
+            <div class="modal-header">
+                <h2>Dettaglio Appuntamento</h2>
+                <button class="modal-close" id="modalDetClose">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="dettaglioBody">
+                <!-- Popolato da JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-sm" id="btnEliminaApp">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Elimina
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnModificaApp">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Modifica
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
