@@ -6,35 +6,583 @@
     <title>Silvia — Dettaglio Lead</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+    /* ── Lead Dettaglio — Stili specifici ── */
+    .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        align-items: start;
+    }
 
+    .detail-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .detail-header .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.15s;
+    }
+    .detail-header .back-link:hover { color: #1e40af; }
+
+    .detail-header .lead-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    /* ── Tab content ── */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Genitore section ── */
+    .genitore-section {
+        display: none;
+        margin-top: 16px;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+    .genitore-section.visible { display: block; }
+    .genitore-section .form-section-title { margin-top: 0; }
+
+    /* ── Classi recupero checkboxes ── */
+    .classi-recupero-group {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+    }
+    .classi-recupero-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .classi-recupero-group input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #1e40af;
+    }
+
+    /* ── File upload area ── */
+    .file-upload-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .file-upload-area .file-link {
+        color: #1e40af;
+        font-size: 13px;
+        text-decoration: underline;
+        word-break: break-all;
+    }
+    .file-upload-area .file-link:hover { color: #1e3a8a; }
+
+    /* ── Rate table ── */
+    .rate-table .form-input {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    .rate-total {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 2px solid #e2e8f0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    /* ── Notes list ── */
+    .note-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .note-item-date {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 6px;
+    }
+    .note-item-text {
+        font-size: 14px;
+        color: #1e293b;
+        white-space: pre-wrap;
+        line-height: 1.5;
+    }
+    .note-item-delete {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        line-height: 1;
+    }
+    .note-item-delete:hover { color: #ef4444; background: #fef2f2; }
+
+    /* ── Actions panel ── */
+    .actions-panel {
+        position: sticky;
+        top: 32px;
+    }
+    .actions-panel .card { padding: 20px; }
+
+    .action-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .action-section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .action-section-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .action-buttons .btn { width: 100%; justify-content: center; }
+
+    .contact-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+    }
+    .contact-buttons .btn {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+        .detail-layout {
+            grid-template-columns: 1fr;
+        }
+        .actions-panel {
+            position: static;
+        }
+    }
+    @media (max-width: 768px) {
+        .contact-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content">
-            <div class="page-header">
-                <h1>Dettaglio Lead</h1>
+
+            <!-- Header con link indietro e nome -->
+            <div class="detail-header" id="detailHeader">
+                <a href="lead-elenco.html" class="back-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    Torna ai Lead
+                </a>
+                <span class="lead-name" id="leadNameHeader">Nuovo Lead</span>
+                <span class="badge" id="leadStatoBadge" style="display:none;"></span>
             </div>
-            <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                    <p class="empty-state-text">Dettaglio Lead — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+
+            <!-- Layout a 2 colonne -->
+            <div class="detail-layout">
+
+                <!-- ═══ COLONNA SINISTRA — Form con tab ═══ -->
+                <div class="detail-left">
+                    <div class="card">
+                        <!-- Tab bar -->
+                        <div class="tabs" id="tabsBar">
+                            <button class="tab-item active" data-tab="anagrafici">Dati Anagrafici</button>
+                            <button class="tab-item" data-tab="studente">Dati Studente</button>
+                            <button class="tab-item" data-tab="pagamenti">Pagamenti</button>
+                            <button class="tab-item" data-tab="storico">Storico Stati</button>
+                            <button class="tab-item" data-tab="note">Note</button>
+                        </div>
+
+                        <!-- ── TAB: Dati Anagrafici ── -->
+                        <div class="tab-pane active" id="tab-anagrafici">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nome *</label>
+                                    <input type="text" class="form-input" id="fieldNome" placeholder="Nome" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Cognome *</label>
+                                    <input type="text" class="form-input" id="fieldCognome" placeholder="Cognome" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Telefono *</label>
+                                    <input type="tel" class="form-input" id="fieldTelefono" placeholder="Telefono">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-input" id="fieldEmail" placeholder="Email">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Provincia</label>
+                                    <input type="text" class="form-input" id="fieldProvincia" placeholder="Es: NA, SA...">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Fonte</label>
+                                    <select class="form-select" id="fieldFonte">
+                                        <option value="">— Seleziona —</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Data creazione</label>
+                                    <input type="text" class="form-input" id="fieldDataCreazione" readonly style="background:#f8fafc;color:#64748b;">
+                                </div>
+                                <div></div>
+                            </div>
+
+                            <!-- Checkbox minore -->
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" id="fieldIsMinore">
+                                    <span>Il lead è un minore</span>
+                                </label>
+                            </div>
+
+                            <!-- Sezione genitore (nascosta di default) -->
+                            <div class="genitore-section" id="genitoreSection">
+                                <div class="form-section-title">Dati Genitore / Tutore</div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Nome genitore</label>
+                                        <input type="text" class="form-input" id="fieldGenitoreNome" placeholder="Nome">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Cognome genitore</label>
+                                        <input type="text" class="form-input" id="fieldGenitoreCognome" placeholder="Cognome">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Telefono genitore</label>
+                                        <input type="tel" class="form-input" id="fieldGenitoreTelefono" placeholder="Telefono">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Email genitore</label>
+                                        <input type="email" class="form-input" id="fieldGenitoreEmail" placeholder="Email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:24px;text-align:right;">
+                                <button class="btn btn-success" onclick="salvaAnagrafici()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Salva modifiche
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Dati Studente ── -->
+                        <div class="tab-pane" id="tab-studente">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Data di nascita</label>
+                                    <input type="date" class="form-input" id="fieldDataNascita">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Codice Fiscale</label>
+                                    <input type="text" class="form-input" id="fieldCF" placeholder="Codice Fiscale" maxlength="16" style="text-transform:uppercase;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Residenza</label>
+                                    <input type="text" class="form-input" id="fieldResidenza" placeholder="Indirizzo completo">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Cellulare studente</label>
+                                    <input type="tel" class="form-input" id="fieldCellulareStudente" placeholder="Cellulare">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Email studente</label>
+                                    <input type="email" class="form-input" id="fieldEmailStudente" placeholder="Email">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Scuola provenienza</label>
+                                    <input type="text" class="form-input" id="fieldScuolaProvenienza" placeholder="Nome scuola">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Data ritiro scuola</label>
+                                    <input type="date" class="form-input" id="fieldDataRitiro">
+                                </div>
+                                <div></div>
+                            </div>
+
+                            <div class="form-section-title">Percorso formativo</div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Macro Area</label>
+                                    <select class="form-select" id="fieldMacroArea">
+                                        <option value="">— Seleziona —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Corso di studi</label>
+                                    <select class="form-select" id="fieldCorsoStudi">
+                                        <option value="">— Seleziona —</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Servizio</label>
+                                    <select class="form-select" id="fieldServizio">
+                                        <option value="">— Seleziona —</option>
+                                        <option value="Frequenza in sede">Frequenza in sede</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Senza Frequenza">Senza Frequenza</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Inserimento classe</label>
+                                    <select class="form-select" id="fieldInserimentoClasse">
+                                        <option value="">— Seleziona —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Classi recupero</label>
+                                <div class="classi-recupero-group" id="classiRecuperoGroup">
+                                    <label><input type="checkbox" value="I"> I</label>
+                                    <label><input type="checkbox" value="II"> II</label>
+                                    <label><input type="checkbox" value="III"> III</label>
+                                    <label><input type="checkbox" value="IV"> IV</label>
+                                    <label><input type="checkbox" value="V"> V</label>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Partenze effettuate</label>
+                                    <input type="text" class="form-input" id="fieldPartenze" placeholder="Es: 2 partenze">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Scuola assegnazione</label>
+                                    <select class="form-select" id="fieldScuolaAssegnazione">
+                                        <option value="">— Seleziona —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Calendario scolastico (PDF)</label>
+                                <div class="file-upload-area">
+                                    <input type="file" id="fieldCalendarioFile" accept=".pdf,.jpg,.jpeg,.png" style="font-size:13px;">
+                                    <span id="calendarioLink"></span>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:24px;text-align:right;">
+                                <button class="btn btn-success" onclick="salvaStudente()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Salva modifiche
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Pagamenti ── -->
+                        <div class="tab-pane" id="tab-pagamenti">
+                            <div class="form-group">
+                                <label class="form-label">Modalità di pagamento</label>
+                                <select class="form-select" id="fieldModalitaPagamento">
+                                    <option value="">— Seleziona —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-section-title">Rate</div>
+                            <div class="table-container">
+                                <table class="table rate-table">
+                                    <thead>
+                                        <tr>
+                                            <th>N°</th>
+                                            <th>Importo €</th>
+                                            <th>Data scadenza</th>
+                                            <th>Pagato</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rateTableBody">
+                                        <!-- Righe rate generate da JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <button class="btn btn-secondary btn-sm" onclick="aggiungiRata()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Aggiungi rata
+                                </button>
+                            </div>
+                            <div class="rate-total">
+                                <span>Totale:</span>
+                                <span id="rateTotale">€ 0,00</span>
+                            </div>
+
+                            <div style="margin-top:24px;text-align:right;">
+                                <button class="btn btn-success" onclick="salvaPagamenti()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Salva modifiche
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Storico Stati ── -->
+                        <div class="tab-pane" id="tab-storico">
+                            <div id="storicoTimeline">
+                                <div class="empty-state" style="padding:40px 20px;">
+                                    <p class="empty-state-text">Nessun cambio stato registrato</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Note ── -->
+                        <div class="tab-pane" id="tab-note">
+                            <div class="form-group">
+                                <label class="form-label">Nuova nota</label>
+                                <textarea class="form-textarea" id="nuovaNotaText" rows="3" placeholder="Scrivi una nota..."></textarea>
+                            </div>
+                            <div style="margin-bottom:24px;text-align:right;">
+                                <button class="btn btn-primary btn-sm" onclick="aggiungiNota()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Aggiungi nota
+                                </button>
+                            </div>
+                            <div id="noteList">
+                                <div class="empty-state" style="padding:40px 20px;">
+                                    <p class="empty-state-text">Nessuna nota presente</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
+
+                <!-- ═══ COLONNA DESTRA — Azioni ═══ -->
+                <div class="actions-panel" id="actionsPanel">
+                    <div class="card">
+
+                        <!-- Cambia stato -->
+                        <div class="action-section">
+                            <div class="action-section-label">Cambia stato</div>
+                            <select class="form-select" id="actionCambiaStato" onchange="cambiaStato()">
+                                <option value="">— Seleziona stato —</option>
+                            </select>
+                        </div>
+
+                        <!-- Contatta -->
+                        <div class="action-section">
+                            <div class="action-section-label">Contatta</div>
+                            <div class="contact-buttons">
+                                <button class="btn btn-whatsapp btn-sm" onclick="apriWhatsApp()" title="WhatsApp">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.347 0-4.518-.803-6.242-2.148l-.436-.348-3.2 1.073 1.073-3.2-.348-.436A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                                    WhatsApp
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="apriEmail()" title="Email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    Email
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="apriChiamata()" title="Chiama">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    Chiama
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Appuntamento -->
+                        <div class="action-section">
+                            <div class="action-section-label">Appuntamento</div>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary btn-sm" onclick="apriModaleAppuntamento()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    Nuovo appuntamento
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Template -->
+                        <div class="action-section">
+                            <div class="action-section-label">Template</div>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-sm" onclick="apriModaleTemplate()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    Usa template
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Elimina -->
+                        <div class="action-section">
+                            <div class="action-buttons">
+                                <button class="btn btn-danger btn-sm" onclick="eliminaLead()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    Elimina Lead
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div><!-- /detail-layout -->
+
         </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/lead-dettaglio.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => renderSidebar('lead'));
-    </script>
 </body>
 </html>
