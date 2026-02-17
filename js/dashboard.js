@@ -39,10 +39,10 @@ async function loadDashboardData(from, to) {
     const leadTotali = leads.length;
 
     // ── Contatore: Nuovi Lead (stato "Nuovo") ──
-    const nuoviLead = leads.filter(l => l.stato === 'Nuovo').length;
+    const nuoviLead = leads.filter(l => (l.stato || '').toLowerCase() === 'nuovo').length;
 
-    // ── Contatore: Iscritti (stato "Iscritto") ──
-    const iscritti = leads.filter(l => l.stato === 'Iscritti').length;
+    // ── Contatore: Iscritti ──
+    const iscritti = leads.filter(l => (l.stato || '').toLowerCase() === 'iscritti').length;
 
     // ── Contatore: Appuntamenti Oggi ──
     const oggi = new Date();
