@@ -45,13 +45,14 @@ async function loadDashboardData(from, to) {
     const iscritti = leads.filter(l => l.stato === 'Iscritto').length;
 
     // ── Contatore: Appuntamenti Oggi ──
+    // Il campo "data" in Firestore è salvato come stringa "YYYY-MM-DD"
     const oggi = new Date();
-    const oggiInizio = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate(), 0, 0, 0);
-    const oggiFine = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate(), 23, 59, 59);
+    const oggiStr = oggi.getFullYear() + '-' +
+      String(oggi.getMonth() + 1).padStart(2, '0') + '-' +
+      String(oggi.getDate()).padStart(2, '0');
 
     const appSnap = await db.collection('appuntamenti')
-      .where('data', '>=', oggiInizio)
-      .where('data', '<=', oggiFine)
+      .where('data', '==', oggiStr)
       .get();
 
     const appuntamentiOggi = [];
@@ -168,8 +169,13 @@ function renderAppuntamentiOggi(appuntamenti) {
     const badgeColor = isNuovo ? '#1e40af' : '#a16207';
     const badgeLabel = isNuovo ? 'Nuovo' : 'Richiamo';
 
+    // Link: se c'è un leadId vai al dettaglio lead, altrimenti vai all'agenda
+    const linkHref = app.leadId
+      ? `lead-dettaglio.html?id=${app.leadId}`
+      : `agenda.html`;
+
     return `
-      <div class="dash-list-item" onclick="window.location.href='lead-dettaglio.html?id=${app.leadId}'" style="cursor:pointer">
+      <div class="dash-list-item" onclick="window.location.href='${linkHref}'" style="cursor:pointer">
         <div class="dash-list-info">
           <span class="dash-list-time">${ora}</span>
           <span class="dash-list-name">${nome}</span>
