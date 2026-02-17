@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silvia — Seed Database</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="seed-container">
+        <div class="card">
+            <h1 style="font-size:24px;font-weight:700;color:#1e40af;margin-bottom:4px">SILVIA</h1>
+            <p style="color:#64748b;margin-bottom:24px">Inizializzazione Database</p>
+
+            <p style="margin-bottom:16px;font-size:14px;color:#1e293b">
+                Questo script crea il documento <strong>impostazioni/config</strong> in Firestore con tutti i dati di default: stati, corsi di studio, scuole, macro aree, ecc.
+            </p>
+            <p style="margin-bottom:24px;font-size:13px;color:#f59e0b;font-weight:500">
+                ⚠ Da eseguire UNA SOLA VOLTA. Se il documento esiste già, non verrà sovrascritto.
+            </p>
+
+            <button class="btn btn-primary" id="seedBtn" style="width:100%">Inizializza Database</button>
+
+            <div class="seed-log" id="seedLog" style="display:none"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        const seedBtn = document.getElementById('seedBtn');
+        const seedLog = document.getElementById('seedLog');
+
+        function log(msg) {
+            seedLog.style.display = 'block';
+            seedLog.textContent += msg + '\n';
+            seedLog.scrollTop = seedLog.scrollHeight;
+        }
+
+        seedBtn.addEventListener('click', async () => {
+            seedBtn.disabled = true;
+            seedBtn.textContent = 'Inizializzazione in corso...';
+
+            try {
+                // Controlla se esiste già
+                log('🔍 Controllo se impostazioni/config esiste...');
+                const doc = await db.collection('impostazioni').doc('config').get();
+
+                if (doc.exists) {
+                    log('⚠ Il documento impostazioni/config ESISTE GIÀ.');
+                    log('   Nessuna modifica effettuata.');
+                    seedBtn.textContent = 'Già inizializzato';
+                    return;
+                }
+
+                log('📝 Creazione documento impostazioni/config...\n');
+
+                const configData = {
+                    // ── Stati ──
+                    stati: [
+                        { id: 'nuovo', nome: 'Nuovo', colore: '#22c55e', posizione: 0, eliminabile: false }
+                    ],
+
+                    // ── Fonti ──
+                    fonti: [],
+
+                    // ── Macro Aree ──
+                    macroAree: [
+                        { id: 'idoneita', nome: 'Idoneità', posizione: 0 },
+                        { id: 'idoneita_maturita', nome: 'Idoneità + Maturità', posizione: 1 },
+                        { id: 'maturita', nome: 'Maturità', posizione: 2 }
+                    ],
+
+                    // ── Corsi di Studio ──
+                    corsiStudi: [
+                        { id: 'afm_ing_spa', nome: 'AFM (ING-SPA)', posizione: 0 },
+                        { id: 'afm_ing_fra', nome: 'AFM (ING-FRA)', posizione: 1 },
+                        { id: 'afm_sia', nome: 'AFM-SIA', posizione: 2 },
+                        { id: 'alb_eno_ing_spa', nome: 'ALBERGHIERO ENO (ING-SPA)', posizione: 3 },
+                        { id: 'alb_eno_ing_fra', nome: 'ALBERGHIERO ENO (ING-FRA)', posizione: 4 },
+                        { id: 'alb_sala_ing_spa', nome: 'ALBERGHIERO SALA-ACCOG. (ING-SPA)', posizione: 5 },
+                        { id: 'alb_sala_ing_fra', nome: 'ALBERGHIERO SALA-ACCOG. (ING-FRA)', posizione: 6 },
+                        { id: 'alb_pasticceria', nome: 'ALBERGHIERO PASTICCERIA', posizione: 7 },
+                        { id: 'cat', nome: 'COSTRUZIONI AMBIENTE E TERRITORIO', posizione: 8 },
+                        { id: 'elettronica', nome: 'ELETTRONICA ED ELETTROT.', posizione: 9 },
+                        { id: 'informatica', nome: 'INFORMATICA E TELECOMUNICAZIONI', posizione: 10 },
+                        { id: 'liceo_classico', nome: 'LICEO CLASSICO', posizione: 11 },
+                        { id: 'liceo_linguistico', nome: 'LICEO LINGUISTICO', posizione: 12 },
+                        { id: 'liceo_scienze_umane', nome: 'LICEO SCIENZE UMANE', posizione: 13 },
+                        { id: 'liceo_econ_soc_spa', nome: 'LICEO ECON. – SOCIALE (ING-SPA)', posizione: 14 },
+                        { id: 'liceo_econ_soc_fra', nome: 'LICEO ECON. – SOCIALE (ING-FRA)', posizione: 15 },
+                        { id: 'liceo_made_italy', nome: 'LICEO MADE IN ITALY', posizione: 16 },
+                        { id: 'liceo_scientifico', nome: 'LICEO SCIENTIFICO', posizione: 17 },
+                        { id: 'liceo_scienze_app', nome: 'LICEO SCIENZE APPLICATE', posizione: 18 },
+                        { id: 'meccanica', nome: 'MECCANICA E MECCATRONICA', posizione: 19 },
+                        { id: 'moda', nome: 'MODA', posizione: 20 },
+                        { id: 'nautico_cap', nome: 'NAUTICO CAPITANO', posizione: 21 },
+                        { id: 'nautico_mac', nome: 'NAUTICO MACCHINISTA', posizione: 22 },
+                        { id: 'ottico', nome: 'OTTICO', posizione: 23 },
+                        { id: 'odontoiatrico', nome: 'ODONTOIATRICO', posizione: 24 },
+                        { id: 'rim_turistico', nome: 'RIM-TURISTICO', posizione: 25 },
+                        { id: 'servizi_soc_spa', nome: 'SERVIZI SOCIALI (ING-SPA)', posizione: 26 },
+                        { id: 'servizi_soc_fra', nome: 'SERVIZI SOCIALI (ING-FRA)', posizione: 27 }
+                    ],
+
+                    // ── Scuole Convenzionate ──
+                    scuole: [
+                        { id: 'kolbe_nola', nome: 'KOLBE – NOLA', posizione: 0 },
+                        { id: 'intel_sarno', nome: 'INTELIGHENTIA – SARNO', posizione: 1 },
+                        { id: 'intel_bracigliano', nome: 'INTELLIGHENTIA – BRACIGLIANO', posizione: 2 },
+                        { id: 'intel_angri', nome: 'INTELLIGHENTIA – ANGRI', posizione: 3 },
+                        { id: 'pirandello_nocera', nome: 'PIRANDELLO – NOCERA INFERIORE', posizione: 4 },
+                        { id: 'volta_orta', nome: 'VOLTA – ORTA DI ATELLA', posizione: 5 },
+                        { id: 'verga_frattaminore', nome: 'G. VERGA – FRATTAMINORE', posizione: 6 },
+                        { id: 'verga_acerra', nome: 'G. VERGA – ACERRA', posizione: 7 },
+                        { id: 'vespucci_fratta', nome: 'A. VESPUCCI – FRATTAMAGGIORE', posizione: 8 }
+                    ],
+
+                    // ── Classi Recupero ──
+                    classi: [],
+
+                    // ── Scuole Assegnazione ──
+                    scuoleAssegnazione: [],
+
+                    // ── Modalità Pagamento ──
+                    modalitaPagamento: []
+                };
+
+                await db.collection('impostazioni').doc('config').set(configData);
+
+                log('✅ STATI:');
+                configData.stati.forEach(s => log(`   • ${s.nome} (${s.colore})`));
+
+                log('\n✅ MACRO AREE:');
+                configData.macroAree.forEach(m => log(`   • ${m.nome}`));
+
+                log('\n✅ CORSI DI STUDIO (' + configData.corsiStudi.length + '):');
+                configData.corsiStudi.forEach(c => log(`   • ${c.nome}`));
+
+                log('\n✅ SCUOLE CONVENZIONATE (' + configData.scuole.length + '):');
+                configData.scuole.forEach(s => log(`   • ${s.nome}`));
+
+                log('\n🎉 Database inizializzato con successo!');
+                seedBtn.textContent = '✓ Completato';
+                seedBtn.style.background = '#22c55e';
+
+            } catch (err) {
+                log('\n❌ ERRORE: ' + err.message);
+                console.error(err);
+                seedBtn.textContent = 'Errore — Riprova';
+                seedBtn.disabled = false;
+                seedBtn.style.background = '#ef4444';
+            }
+        });
+    </script>
+</body>
+</html>
