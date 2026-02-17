@@ -3,38 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silvia — Lead Elenco</title>
+    <title>Silvia — Lead</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content">
+
+            <!-- HEADER -->
             <div class="page-header">
-                <h1>Lead Elenco</h1>
-            </div>
-            <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-                    <p class="empty-state-text">Lead Elenco — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+                <h1>Lead</h1>
+                <div class="page-header-actions">
+                    <a href="import-excel.html" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Importa Excel
+                    </a>
+                    <a href="lead-dettaglio.html?new=true" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuovo Lead
+                    </a>
                 </div>
             </div>
+
+            <!-- TOGGLE VISTA -->
+            <div class="tabs" style="margin-bottom:16px;">
+                <a href="lead-elenco.html" class="tab-item active">Elenco</a>
+                <a href="lead-kanban.html" class="tab-item">Kanban</a>
+            </div>
+
+            <!-- FILTRI -->
+            <div class="card" style="margin-bottom:20px; padding:16px 20px;">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
+                    <div id="periodFilterContainer"></div>
+                    <select class="form-select" id="filtroFonte" style="width:auto; min-width:150px;">
+                        <option value="">Tutte le fonti</option>
+                    </select>
+                    <select class="form-select" id="filtroStato" style="width:auto; min-width:150px;">
+                        <option value="">Tutti gli stati</option>
+                    </select>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cerca nome, cognome, tel, email...">
+                </div>
+            </div>
+
+            <!-- BARRA AZIONI SELEZIONE -->
+            <div id="bulkBar" class="card hidden" style="margin-bottom:16px; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; background:#fef2f2;">
+                <span id="bulkCount" style="font-weight:500; color:#1e293b;">0 selezionati</span>
+                <button class="btn btn-danger btn-sm" id="bulkDeleteBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Elimina selezionati
+                </button>
+            </div>
+
+            <!-- TABELLA -->
+            <div class="card">
+                <div class="table-container">
+                    <table class="table" id="leadTable">
+                        <thead>
+                            <tr>
+                                <th style="width:40px"><input type="checkbox" id="selectAll" class="checkbox-cell"></th>
+                                <th data-sort="nome" style="cursor:pointer">Nome ↕</th>
+                                <th data-sort="cognome" style="cursor:pointer">Cognome ↕</th>
+                                <th data-sort="telefono" style="cursor:pointer">Telefono ↕</th>
+                                <th data-sort="email" style="cursor:pointer">Email ↕</th>
+                                <th data-sort="fonte" style="cursor:pointer">Fonte ↕</th>
+                                <th data-sort="stato" style="cursor:pointer">Stato ↕</th>
+                                <th data-sort="dataCreazione" style="cursor:pointer">Data ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <!-- EMPTY STATE -->
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <p class="empty-state-text">Nessun lead trovato</p>
+                    <p class="empty-state-subtext">Prova a modificare i filtri o crea un nuovo lead</p>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/lead.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => renderSidebar('lead'));
-    </script>
 </body>
 </html>
