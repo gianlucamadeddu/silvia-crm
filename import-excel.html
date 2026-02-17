@@ -3,25 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silvia — Import Excel</title>
+    <title>Silvia — Importa da Excel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-
+    <style>
+        .drop-zone {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+            margin-bottom: 24px;
+        }
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+        .drop-zone-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            color: #94a3b8;
+        }
+        .drop-zone.dragover .drop-zone-icon { color: #1e40af; }
+        .drop-zone-text {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .drop-zone-subtext {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .preview-summary {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .preview-summary .valid { color: #22c55e; font-weight: 600; }
+        .preview-summary .invalid { color: #ef4444; font-weight: 600; }
+        .row-error td {
+            background: #fef2f2 !important;
+            color: #ef4444;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content">
+
+            <!-- HEADER -->
             <div class="page-header">
-                <h1>Import Excel</h1>
-            </div>
-            <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-                    <p class="empty-state-text">Import Excel — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <a href="lead-elenco.html" class="btn btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        Torna ai Lead
+                    </a>
+                    <h1>Importa da Excel</h1>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-secondary" id="downloadTemplateBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Scarica Template
+                    </button>
                 </div>
             </div>
+
+            <!-- DROP ZONE -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <p class="drop-zone-text">Trascina qui il file .xlsx oppure clicca per sceglierlo</p>
+                <p class="drop-zone-subtext">Solo file Excel (.xlsx)</p>
+                <input type="file" id="fileInput" accept=".xlsx" style="display:none">
+            </div>
+
+            <!-- PREVIEW -->
+            <div id="previewSection" class="hidden">
+                <div class="card" style="margin-bottom:20px; padding:20px;">
+                    <div class="preview-summary" id="previewSummary"></div>
+                    <div class="table-container">
+                        <table class="table" id="previewTable">
+                            <thead id="previewHead"></thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="importBtn" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Importa lead validi
+                </button>
+            </div>
+
         </main>
     </div>
 
@@ -33,8 +113,5 @@
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/import-excel.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => renderSidebar('lead'));
-    </script>
 </body>
 </html>
