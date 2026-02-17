@@ -1,12 +1,12 @@
-
 /* ══════════════════════════════════
    Dashboard — Stili specifici
    ══════════════════════════════════ */
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 24px;
+  align-items: start;
 }
 
 .card-header {
@@ -22,6 +22,13 @@
   font-size: 16px;
   font-weight: 600;
   color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-header h3 svg {
+  flex-shrink: 0;
 }
 
 .dash-list-item {
