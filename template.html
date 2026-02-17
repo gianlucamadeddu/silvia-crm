@@ -6,7 +6,6 @@
     <title>Silvia — Template</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-
 </head>
 <body>
     <div class="app-container">
@@ -14,21 +13,82 @@
         <main class="main-content">
             <div class="page-header">
                 <h1>Template</h1>
-            </div>
-            <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                    <p class="empty-state-text">Template — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" id="btnNuovoTemplate">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuovo Template
+                    </button>
                 </div>
             </div>
+            <div class="page-content" id="pageContent">
+                <!-- Popolato da template.js -->
+            </div>
         </main>
+    </div>
+
+    <!-- Modale Creazione / Modifica Template -->
+    <div class="modal-overlay hidden" id="modalTemplate">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="modalTemplateTitle">Nuovo Template</h2>
+                <button class="modal-close" id="modalTemplateClose">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Nome -->
+                <div class="form-group">
+                    <label class="form-label">Nome template *</label>
+                    <input type="text" class="form-input" id="tplNome" placeholder="Es: Benvenuto nuovo studente">
+                </div>
+
+                <!-- Tipo -->
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" id="tplTipo">
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Email">Email</option>
+                    </select>
+                </div>
+
+                <!-- Testo -->
+                <div class="form-group">
+                    <label class="form-label">Testo messaggio</label>
+                    <textarea class="form-textarea" id="tplTesto" rows="6" placeholder="Scrivi il messaggio qui..."></textarea>
+                </div>
+
+                <!-- Variabili rapide -->
+                <div class="form-group">
+                    <label class="form-label text-sm" style="margin-bottom:8px">Inserisci variabile alla posizione del cursore:</label>
+                    <div class="tpl-variables-bar" id="tplVariablesBar">
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{NOME}">{NOME}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{COGNOME}">{COGNOME}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{NOME_COMPLETO}">{NOME_COMPLETO}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{TELEFONO}">{TELEFONO}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{EMAIL}">{EMAIL}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{CORSO_STUDI}">{CORSO_STUDI}</button>
+                        <button type="button" class="btn btn-secondary btn-sm tpl-var-btn" data-var="{SCUOLA}">{SCUOLA}</button>
+                    </div>
+                </div>
+
+                <!-- Anteprima live -->
+                <div class="form-group">
+                    <label class="form-label text-sm">Anteprima</label>
+                    <div class="tpl-preview-box" id="tplPreview">
+                        <em class="text-muted text-sm">Scrivi qualcosa per vedere l'anteprima...</em>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalTemplateCancelBtn">Annulla</button>
+                <button class="btn btn-primary" id="modalTemplateSaveBtn">Salva</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
