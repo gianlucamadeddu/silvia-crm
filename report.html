@@ -6,7 +6,192 @@
     <title>Silvia — Report</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ── Report-specific styles ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+        .chart-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        .filters-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .filters-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        .results-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .results-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .table-sortable th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .table-sortable th:hover {
+            background: #eef2f7;
+        }
+        .table-sortable th .sort-icon {
+            margin-left: 4px;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .table-sortable th.sorted-asc .sort-icon,
+        .table-sortable th.sorted-desc .sort-icon {
+            color: #1e40af;
+        }
+        .table tr.clickable-row {
+            cursor: pointer;
+        }
+        .multi-select-wrapper {
+            position: relative;
+        }
+        .multi-select-btn {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e293b;
+            background: #ffffff;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: border-color 0.15s ease;
+        }
+        .multi-select-btn:focus,
+        .multi-select-btn.open {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30,64,175,0.1);
+            outline: none;
+        }
+        .multi-select-btn .placeholder {
+            color: #94a3b8;
+        }
+        .multi-select-btn .arrow {
+            font-size: 10px;
+            color: #64748b;
+            transition: transform 0.15s ease;
+        }
+        .multi-select-btn.open .arrow {
+            transform: rotate(180deg);
+        }
+        .multi-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .multi-select-dropdown.open {
+            display: block;
+        }
+        .multi-select-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .multi-select-option:hover {
+            background: #f1f5f9;
+        }
+        .multi-select-option input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #1e40af;
+            flex-shrink: 0;
+        }
+        .badge-payment {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-pagato { background: #dcfce7; color: #16a34a; }
+        .badge-non-pagato { background: #fef2f2; color: #ef4444; }
+        .badge-in-ritardo { background: #fef9c3; color: #a16207; }
+        .badge-parziale { background: #dbeafe; color: #1e40af; }
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #64748b;
+            font-size: 14px;
+            gap: 8px;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #1e40af;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .filters-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -16,10 +201,184 @@
                 <h1>Report</h1>
             </div>
             <div class="page-content" id="pageContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-                    <p class="empty-state-text">Report — In costruzione</p>
-                    <p class="empty-state-subtext">Questo modulo verrà completato nelle prossime fasi</p>
+
+                <!-- ══ TABS ══ -->
+                <div class="tabs">
+                    <button class="tab-item active" data-tab="commerciale">Report Commerciale</button>
+                    <button class="tab-item" data-tab="estrazioni">Estrazioni Studenti</button>
+                </div>
+
+                <!-- ══════════════════════════════ -->
+                <!-- TAB: REPORT COMMERCIALE        -->
+                <!-- ══════════════════════════════ -->
+                <div id="tabCommerciale" class="tab-content">
+
+                    <!-- Filtro Periodo -->
+                    <div style="margin-bottom:24px" id="periodFilterContainer"></div>
+
+                    <!-- Contatori -->
+                    <div class="counters-row" id="reportCounters">
+                        <div class="loading-spinner"><div class="spinner"></div> Caricamento...</div>
+                    </div>
+
+                    <!-- Contatori per Stato (dinamici) -->
+                    <div class="counters-row" id="statiCounters"></div>
+
+                    <!-- Grafici -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Lead per Stato</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="chartStati"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Lead per Fonte</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="chartFonti"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card full-width">
+                            <h3>Andamento nel Tempo</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="chartTempo"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export -->
+                    <div style="text-align:right">
+                        <button class="btn btn-primary" id="btnExportReport">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Esporta Report in Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════ -->
+                <!-- TAB: ESTRAZIONI STUDENTI       -->
+                <!-- ══════════════════════════════ -->
+                <div id="tabEstrazioni" class="tab-content" style="display:none">
+
+                    <!-- Filtri -->
+                    <div class="filters-card">
+                        <h3>Filtri</h3>
+                        <div class="filters-grid" id="estrazioniFilters">
+                            <!-- Date partenza -->
+                            <div class="form-group">
+                                <label class="form-label">Data partenza Da</label>
+                                <input type="date" class="form-input" id="filtroPartenzaDa">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Data partenza A</label>
+                                <input type="date" class="form-input" id="filtroPartenzaA">
+                            </div>
+                            <!-- Scadenze pagamenti -->
+                            <div class="form-group">
+                                <label class="form-label">Scadenza pagamento Da</label>
+                                <input type="date" class="form-input" id="filtroScadenzaDa">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Scadenza pagamento A</label>
+                                <input type="date" class="form-input" id="filtroScadenzaA">
+                            </div>
+                            <!-- Corso studi (multi) -->
+                            <div class="form-group">
+                                <label class="form-label">Corso di Studi</label>
+                                <div class="multi-select-wrapper" id="msCorso"></div>
+                            </div>
+                            <!-- Scuola convenzionata (multi) -->
+                            <div class="form-group">
+                                <label class="form-label">Scuola Convenzionata</label>
+                                <div class="multi-select-wrapper" id="msScuola"></div>
+                            </div>
+                            <!-- Scuola assegnazione (multi) -->
+                            <div class="form-group">
+                                <label class="form-label">Scuola Assegnazione</label>
+                                <div class="multi-select-wrapper" id="msScuolaAss"></div>
+                            </div>
+                            <!-- Classe (multi) -->
+                            <div class="form-group">
+                                <label class="form-label">Classe</label>
+                                <div class="multi-select-wrapper" id="msClasse"></div>
+                            </div>
+                            <!-- Macro Area -->
+                            <div class="form-group">
+                                <label class="form-label">Macro Area</label>
+                                <select class="form-select" id="filtroMacroArea">
+                                    <option value="">Tutte</option>
+                                </select>
+                            </div>
+                            <!-- Stato Pagamento -->
+                            <div class="form-group">
+                                <label class="form-label">Stato Pagamento</label>
+                                <select class="form-select" id="filtroStatoPagamento">
+                                    <option value="">Tutti</option>
+                                    <option value="pagato">Pagato</option>
+                                    <option value="non_pagato">Non pagato</option>
+                                    <option value="in_ritardo">In ritardo</option>
+                                </select>
+                            </div>
+                            <!-- Servizio -->
+                            <div class="form-group">
+                                <label class="form-label">Servizio</label>
+                                <select class="form-select" id="filtroServizio">
+                                    <option value="">Tutti</option>
+                                    <option value="In sede">In sede</option>
+                                    <option value="Online">Online</option>
+                                    <option value="Senza Frequenza">Senza Frequenza</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Bottoni filtri -->
+                        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+                            <button class="btn btn-secondary" id="btnResetFiltri">Reset filtri</button>
+                            <button class="btn btn-primary" id="btnCercaEstrazione">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                Cerca
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Risultati -->
+                    <div id="estrazioniResults" style="display:none">
+                        <div class="results-info">
+                            <span class="results-count" id="resultsCount">0 studenti trovati</span>
+                            <button class="btn btn-primary btn-sm" id="btnExportEstrazione">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Esporta in Excel
+                            </button>
+                        </div>
+                        <div class="card">
+                            <div class="table-container">
+                                <table class="table table-sortable" id="estrazioniTable">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="nome">Nome <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="cognome">Cognome <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="corsoStudi">Corso <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="scuola">Scuola <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="classe">Classe <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="macroArea">Macro Area <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="pagamento">Pagamento <span class="sort-icon">▲▼</span></th>
+                                            <th data-sort="scadenza">Scadenza <span class="sort-icon">▲▼</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="estrazioniBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stato vuoto estrazioni -->
+                    <div id="estrazioniEmpty" class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+                        <p class="empty-state-text">Usa i filtri per cercare studenti</p>
+                        <p class="empty-state-subtext">Seleziona i criteri e premi "Cerca"</p>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -33,6 +392,7 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/export-excel.js"></script>
     <script src="js/report.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => renderSidebar('report'));
