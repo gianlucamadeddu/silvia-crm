@@ -702,7 +702,7 @@
 
     let leadLink = '—';
     if (app.leadId && app.leadNome) {
-      leadLink = `<a href="lead-dettaglio.html?id=${app.leadId}">${app.leadNome} ${app.leadCognome || ''}</a>`;
+      leadLink = `<a href="lead-dettaglio.html?id=${app.leadId}" style="display:inline-flex;align-items:center;gap:4px;">${app.leadNome} ${app.leadCognome || ''} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg></a>`;
     } else if (app.leadNome) {
       leadLink = `${app.leadNome} ${app.leadCognome || ''}`;
     }
@@ -744,7 +744,7 @@
           <div class="det-value">${app.descrizione}</div>
         </div>
       </div>` : ''}
-      ${app.tipo === 'richiamo' && app.leadId ? `
+      ${app.leadId ? `
       <div style="margin-top:16px;text-align:center">
         <a href="lead-dettaglio.html?id=${app.leadId}" class="btn btn-primary btn-sm">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
