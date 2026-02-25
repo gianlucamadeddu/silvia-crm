@@ -13,6 +13,7 @@ let chartTempoInstance = null;
 let estrazioniData = [];
 let sortColumn = '';
 let sortDirection = 'asc';
+let selectedFonte = ''; // Filtro fonte attivo
 
 // ══════════════════════════════════
 // INIT
@@ -26,6 +27,9 @@ async function initReport() {
   // Setup periodo per report commerciale
   renderPeriodFilter('periodFilterContainer', onPeriodChange);
 
+  // Setup filtro fonte
+  setupFonteFilter();
+
   // Setup filtri estrazioni
   setupEstrazioniFiltri();
 
@@ -37,6 +41,37 @@ async function initReport() {
 
   // Sorting tabella estrazioni
   setupTableSorting();
+}
+
+// ══════════════════════════════════
+// FILTRO FONTE
+// ══════════════════════════════════
+function setupFonteFilter() {
+  const select = document.getElementById('fonteFilter');
+  if (!select) return;
+
+  const fonti = impostazioni.fonti || [];
+
+  // Popola dropdown con le fonti dalle impostazioni
+  fonti.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.nome;
+    opt.textContent = f.nome;
+    select.appendChild(opt);
+  });
+
+  // Listener: al cambio fonte, aggiorna contatori e grafici
+  select.addEventListener('change', () => {
+    selectedFonte = select.value;
+    renderCounters();
+    renderCharts();
+  });
+}
+
+// Restituisce i lead filtrati per fonte (se selezionata)
+function getFilteredLeads() {
+  if (!selectedFonte) return allLeads;
+  return allLeads.filter(l => (l.fonte || '') === selectedFonte);
 }
 
 // ══════════════════════════════════
@@ -93,25 +128,26 @@ function renderCounters() {
   const container = document.getElementById('reportCounters');
   const statiContainer = document.getElementById('statiCounters');
   const stati = impostazioni.stati || [];
-  const fonti = impostazioni.fonti || [];
+
+  // Usa i lead filtrati per fonte
+  const leads = getFilteredLeads();
 
   // Lead totali
-  const totale = allLeads.length;
+  const totale = leads.length;
 
   // Per fonte (conta le top 3)
   const perFonte = {};
-  allLeads.forEach(l => {
+  leads.forEach(l => {
     const f = l.fonte || 'Non specificata';
     perFonte[f] = (perFonte[f] || 0) + 1;
   });
   const fonteTop = Object.entries(perFonte).sort((a, b) => b[1] - a[1])[0];
 
   // Contratti (stati tipo "contratto" / "iscritto" oppure ultimo stato)
-  // Usiamo una logica generica: cerchiamo stati con nome che contiene parole chiave
   const statiContratto = stati.filter(s =>
     /contratt|iscritt|chiuso|vinto/i.test(s.nome)
   ).map(s => s.nome);
-  const contratti = allLeads.filter(l => statiContratto.includes(l.stato)).length;
+  const contratti = leads.filter(l => statiContratto.includes(l.stato)).length;
 
   // Conversione %
   const conversione = totale > 0 ? ((contratti / totale) * 100).toFixed(1) : '0.0';
@@ -157,7 +193,7 @@ function renderCounters() {
 
   // Card per ogni stato
   const perStato = {};
-  allLeads.forEach(l => {
+  leads.forEach(l => {
     const s = l.stato || 'Sconosciuto';
     perStato[s] = (perStato[s] || 0) + 1;
   });
@@ -188,8 +224,10 @@ function renderCharts() {
 
 function renderChartStati() {
   const stati = impostazioni.stati || [];
+  const leads = getFilteredLeads();
+
   const perStato = {};
-  allLeads.forEach(l => {
+  leads.forEach(l => {
     const s = l.stato || 'Sconosciuto';
     perStato[s] = (perStato[s] || 0) + 1;
   });
@@ -236,8 +274,10 @@ function renderChartStati() {
 }
 
 function renderChartFonti() {
+  const leads = getFilteredLeads();
+
   const perFonte = {};
-  allLeads.forEach(l => {
+  leads.forEach(l => {
     const f = l.fonte || 'Non specificata';
     perFonte[f] = (perFonte[f] || 0) + 1;
   });
@@ -275,9 +315,11 @@ function renderChartFonti() {
 }
 
 function renderChartTempo() {
+  const leads = getFilteredLeads();
+
   // Raggruppa lead per mese di creazione
   const perMese = {};
-  allLeads.forEach(l => {
+  leads.forEach(l => {
     if (!l.dataCreazione) return;
     const d = l.dataCreazione.toDate ? l.dataCreazione.toDate() : new Date(l.dataCreazione);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -337,12 +379,14 @@ function renderChartTempo() {
 
 // ── Export Report Commerciale ──
 function exportReportCommerciale() {
-  if (allLeads.length === 0) {
+  const leads = getFilteredLeads();
+
+  if (leads.length === 0) {
     showToast('Nessun dato da esportare', 'warning');
     return;
   }
 
-  const data = allLeads.map(l => ({
+  const data = leads.map(l => ({
     nome: l.nome || '',
     cognome: l.cognome || '',
     telefono: l.telefono || '',
@@ -362,7 +406,8 @@ function exportReportCommerciale() {
     { header: 'Data Creazione', key: 'dataCreazione', width: 16 }
   ];
 
-  exportToExcel(data, columns, 'Report_Commerciale');
+  const suffix = selectedFonte ? `_${selectedFonte.replace(/\s+/g, '_')}` : '';
+  exportToExcel(data, columns, `Report_Commerciale${suffix}`);
 }
 
 // ══════════════════════════════════
